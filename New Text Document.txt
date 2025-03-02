@@ -1,0 +1,726 @@
+verify.jsx
+
+// verify -> pendingTicket
+
+import { useState } from 'react';
+import { FaCheckCircle, FaTimesCircle, FaClock, FaEye, FaChevronRight, FaInfoCircle } from 'react-icons/fa';
+import laptopImage from "../assets/Laptop.png";
+import projectorImage from "../assets/Projector.png";
+import harddriveImage from "../assets/Haddrive.png"; // Check spelling
+import cameraImage from "../assets/Camera.png";
+import monitorImage from "../assets/Monitor.png";
+import tabletImage from "../assets/Tablet.png";
+import printerImage from "../assets/Printer.png";
+import keyboardImage from "../assets/Keyboard.png";
+
+
+// import Nav from '../../Nav/Nav';
+import { Link } from 'react-router-dom';
+
+const ExecutiveApproval = () => {
+    const [activeTab, setActiveTab] = useState('pending');
+    const [showModal, setShowModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [comment, setComment] = useState('');
+
+    // Sample data
+    const [pendingItems, setPendingItems] = useState([
+        {
+            refNo: 'GP001',
+            name: 'John Doe',
+            inLocation: 'Main Gate',
+            outLocation: 'Side Gate',
+            createdAt: '2024-01-20 09:30',
+            items: [
+                {
+                    itemName: 'Laptop',
+                    serialNo: 'LT789',
+                    returnable: true,
+                    photo: laptopImage
+                }
+            ]
+        },
+
+        {
+          refNo: 'GP002',
+          name: 'Senuja de silva',
+          inLocation: 'Main Gate',
+          outLocation: 'Back Gate',
+          createdAt: '2024-01-20 09:30',
+          items: [
+              {
+                  itemName: 'Camera',
+                  serialNo: 'cm789',
+                  returnable: true,
+                  photo: cameraImage
+              }
+          ]
+      },
+        // Add more items as needed
+    ]);
+
+    const [approvedItems, setApprovedItems] = useState([
+        {
+            refNo: 'GP007',
+            name: 'Jane Smith',
+            inLocation: 'Front Gate',
+            outLocation: 'Back Gate',
+            createdAt: '2024-01-19 14:20',
+            items: [
+                {
+                    itemName: 'Monitor',
+                    serialNo: 'MN456',
+                    returnable: true,
+                    photo: printerImage
+                }
+            ]
+        }
+    ]);
+
+    const [rejectedItems, setRejectedItems] = useState([
+        {
+            refNo: 'GP008',
+            name: 'Mike Brown',
+            inLocation: 'East Gate',
+            outLocation: 'West Gate',
+            createdAt: '2024-01-18 11:45',
+            items: [
+                {
+                    itemName: 'Printer',
+                    serialNo: 'PR123',
+                    returnable: false,
+                    photo: keyboardImage
+                }
+            ]
+        }
+    ]);
+
+    const StatusPill = ({ status }) => {
+        const styles = {
+            pending: 'bg-amber-100 text-amber-800',
+            approved: 'bg-emerald-100 text-emerald-800',
+            rejected: 'bg-rose-100 text-rose-800'
+        };
+        return (
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${styles[status]}`}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+            </span>
+        );
+    };
+
+    const handleApprove = (item) => {
+        setPendingItems(pendingItems.filter(i => i.refNo !== item.refNo));
+        setApprovedItems([...approvedItems, { ...item, comment }]);
+        setShowModal(false);
+        setComment('');
+    };
+
+    const handleReject = (item) => {
+        setPendingItems(pendingItems.filter(i => i.refNo !== item.refNo));
+        setRejectedItems([...rejectedItems, { ...item, comment }]);
+        setShowModal(false);
+        setComment('');
+    };
+
+    return (
+        <div>
+            {/* <Nav /> */}
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 p-8">
+                {/* Header */}
+                <div className="mb-8">
+                    {/* <h1 className="text-3xl font-bold text-gray-900 mb-2">Gate Pass Approvals</h1> */}
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Page</h1>
+                    <p className="text-gray-500 flex items-center">
+                        <FaInfoCircle className="mr-2 text-blue-500" />
+                        Manage and review all gate pass requests
+                    </p>
+                </div>
+
+                {/* Status Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* Pending Card */}
+                    <div 
+                        onClick={() => setActiveTab('pending')}
+                        className={`rounded-2xl shadow-lg overflow-hidden transition-all cursor-pointer ${
+                            activeTab === 'pending' 
+                                ? 'bg-gradient-to-br from-amber-500 to-orange-500 transform scale-105' 
+                                : 'bg-white hover:shadow-xl'
+                        }`}
+                    >
+                        <div className={`p-6 flex flex-col items-center ${activeTab === 'pending' ? 'text-white' : 'text-gray-700'}`}>
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                                activeTab === 'pending' ? 'bg-white/20' : 'bg-amber-100'
+                            }`}>
+                                <FaClock className={activeTab === 'pending' ? 'text-white text-2xl' : 'text-amber-500 text-2xl'} />
+                            </div>
+                            <h3 className="text-xl font-semibold mb-1">Pending</h3>
+                            <div className={`text-3xl font-bold ${activeTab === 'pending' ? 'text-white' : 'text-amber-500'}`}>
+                                {pendingItems.length}
+                            </div>
+                            <p className={activeTab === 'pending' ? 'text-white/80 mt-2 text-sm' : 'text-gray-500 mt-2 text-sm'}>
+                                Awaiting your review
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Approved Card */}
+                    <div 
+                        onClick={() => setActiveTab('approved')}
+                        className={`rounded-2xl shadow-lg overflow-hidden transition-all cursor-pointer ${
+                            activeTab === 'approved' 
+                                ? 'bg-gradient-to-br from-emerald-500 to-green-500 transform scale-105' 
+                                : 'bg-white hover:shadow-xl'
+                        }`}
+                    >
+                        <div className={`p-6 flex flex-col items-center ${activeTab === 'approved' ? 'text-white' : 'text-gray-700'}`}>
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                                activeTab === 'approved' ? 'bg-white/20' : 'bg-emerald-100'
+                            }`}>
+                                <FaCheckCircle className={activeTab === 'approved' ? 'text-white text-2xl' : 'text-emerald-500 text-2xl'} />
+                            </div>
+                            <h3 className="text-xl font-semibold mb-1">Approved</h3>
+                            <div className={`text-3xl font-bold ${activeTab === 'approved' ? 'text-white' : 'text-emerald-500'}`}>
+                                {approvedItems.length}
+                            </div>
+                            <p className={activeTab === 'approved' ? 'text-white/80 mt-2 text-sm' : 'text-gray-500 mt-2 text-sm'}>
+                                Successfully processed
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Rejected Card */}
+                    <div 
+                        onClick={() => setActiveTab('rejected')}
+                        className={`rounded-2xl shadow-lg overflow-hidden transition-all cursor-pointer ${
+                            activeTab === 'rejected' 
+                                ? 'bg-gradient-to-br from-rose-500 to-red-500 transform scale-105' 
+                                : 'bg-white hover:shadow-xl'
+                        }`}
+                    >
+                        <div className={`p-6 flex flex-col items-center ${activeTab === 'rejected' ? 'text-white' : 'text-gray-700'}`}>
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                                activeTab === 'rejected' ? 'bg-white/20' : 'bg-rose-100'
+                            }`}>
+                                <FaTimesCircle className={activeTab === 'rejected' ? 'text-white text-2xl' : 'text-rose-500 text-2xl'} />
+                            </div>
+                            <h3 className="text-xl font-semibold mb-1">Rejected</h3>
+                            <div className={`text-3xl font-bold ${activeTab === 'rejected' ? 'text-white' : 'text-rose-500'}`}>
+                                {rejectedItems.length}
+                            </div>
+                            <p className={activeTab === 'rejected' ? 'text-white/80 mt-2 text-sm' : 'text-gray-500 mt-2 text-sm'}>
+                                Declined requests
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Table Section */}
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div className="p-6 border-b border-gray-100">
+                        <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+                            {activeTab === 'pending' && <FaClock className="mr-2 text-amber-500" />}
+                            {activeTab === 'approved' && <FaCheckCircle className="mr-2 text-emerald-500" />}
+                            {activeTab === 'rejected' && <FaTimesCircle className="mr-2 text-rose-500" />}
+                            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} 
+                            {/* gatepass */}
+                        </h2>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Ref No</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Entry Point</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Exit Point</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                    {/* <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">Actions</th> */}
+                                    <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">Full Details</th>
+
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {(activeTab === 'pending' ? pendingItems :
+                                  activeTab === 'approved' ? approvedItems :
+                                  rejectedItems).map((item) => (
+                                    <tr key={item.refNo} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">{item.refNo}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{item.name}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{item.inLocation}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{item.outLocation}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">{item.createdAt}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedItem(item);
+                                                    setShowModal(true);
+                                                }}
+                                                className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium 
+                                                    ${activeTab === 'pending' 
+                                                        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                                        : activeTab === 'approved'
+                                                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
+                                                            : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                                                    }`}
+                                            >
+                                                <FaEye className="mr-2" /> View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {/* Empty State */}
+                    {(activeTab === 'pending' ? pendingItems :
+                      activeTab === 'approved' ? approvedItems :
+                      rejectedItems).length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <img 
+                                src="/api/placeholder/200/200" 
+                                alt="No items" 
+                                className="w-24 h-24 opacity-50 mb-4"
+                            />
+                            <p className="text-gray-500">No items found</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Modal */}
+                {showModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
+                            <div className="p-8">
+                                <div className="flex justify-between items-start mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-900">Item Details</h2>
+                                    <button
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-500">Reference Number</label>
+                                            <p className="text-gray-900">{selectedItem.refNo}</p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-500">Request Date</label>
+                                            <p className="text-gray-900">{selectedItem.createdAt}</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-500">Items</label>
+                                        <div className="mt-2 space-y-4">
+                                            {selectedItem.items.map((item, index) => (
+                                                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                                                    <div className="flex gap-4">
+                                                        <img 
+                                                            src={item.photo} 
+                                                            alt={item.itemName}
+                                                            className="w-24 h-24 object-cover rounded-lg border"
+                                                        />
+                                                        <div className="flex-1">
+                                                            <h4 className="font-medium text-gray-900">{item.itemName}</h4>
+                                                            <p className="text-sm text-gray-500 mt-1">Serial: {item.serialNo}</p>
+                                                            <p className="text-sm mt-2">
+                                                                Returnable: 
+                                                                <span className={`ml-2 px-2 py-1 rounded-full ${
+                                                                    item.returnable 
+                                                                    ? 'bg-emerald-100 text-emerald-800'
+                                                                    : 'bg-rose-100 text-rose-800'
+                                                                }`}>
+                                                                    {item.returnable ? 'Yes' : 'No'}
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {activeTab === 'pending' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Approval Comment
+                                            </label>
+                                            <textarea
+                                                value={comment}
+                                                onChange={(e) => setComment(e.target.value)}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                rows="3"
+                                                placeholder="Add your comments here..."
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {activeTab === 'pending' && (
+                                <div className="bg-gray-50 px-8 py-4 flex justify-end gap-4">
+                                    <button
+                                        onClick={() => handleReject(selectedItem)}
+                                        className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                                    >
+                                        <FaTimesCircle /> Reject
+                                    </button>
+                                    <button
+                                        onClick={() => handleApprove(selectedItem)}
+                                        className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                                    >
+                                        <FaCheckCircle /> Approve
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ExecutiveApproval;
+
+
+//pending,verified and rejected all are in this file
+
+
+
+
+
+
+
+New request.jsx
+
+
+import React, { useEffect, useState } from 'react';
+import { PlusCircle, X, FileImage, Info } from 'lucide-react';
+
+function NewRequest() {
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([{ id: 1 }]);
+  const [location, setLocation] = useState('');
+  const [executiveOfficer, setExecutiveOfficer] = useState('');
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    setUser(userData);
+  }, []);
+
+  const addMoreItems = () => {
+    setItems([...items, { id: items.length + 1 }]);
+  };
+
+  const removeItem = (id) => {
+    if (items.length > 1) {
+      setItems(items.filter(item => item.id !== id));
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto pt-8 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">New Request Form</h1>
+          <p className="mt-2 text-gray-600">Please fill out the form below to submit your request</p>
+        </div>
+
+        {/* Sender Details Card */}
+        <div className="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+          <div className="bg-blue-600 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white flex items-center">
+              <Info className="mr-2 h-5 w-5" />
+              Sender Details
+            </h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Service No</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="serviceNo" 
+                  value={user?.serviceNo || ''} 
+                  readOnly 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="name" 
+                  value={user?.name || ''} 
+                  readOnly 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="designation" 
+                  value={user?.designation || ''} 
+                  readOnly 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="section" 
+                  value={user?.section || ''} 
+                  readOnly 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Group</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="group" 
+                  value={user?.group || ''} 
+                  readOnly 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact No</label>
+                <input 
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                  type="text" 
+                  name="contactNo" 
+                  value={user?.contactNo || ''} 
+                  readOnly 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Item Cards */}
+        {items.map((item, index) => (
+          <div key={item.id} className="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+            <div className="bg-blue-600 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-white flex items-center">
+                <FileImage className="mr-2 h-5 w-5" />
+                Item Details #{index + 1}
+              </h2>
+              {items.length > 1 && (
+                <button 
+                  onClick={() => removeItem(item.id)}
+                  className="text-white hover:text-red-200 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            <div className="px-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                  <input 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                    type="text" 
+                    name="ItemName" 
+                    placeholder="Enter item name" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Serial No</label>
+                  <input 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                    type="text" 
+                    name="SerialNo" 
+                    placeholder="Enter serial number" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Item Category</label>
+                  <select 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                    name="ItemCategory"
+                  >
+                    <option value="">Select category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Office Supplies">Office Supplies</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Returnable</label>
+                  <div className="flex gap-6">
+                    <label className="flex items-center">
+                      <input 
+                        type="radio" 
+                        name="returnable" 
+                        value="Yes" 
+                        className="form-radio h-5 w-5 text-green-500 border-gray-300 focus:ring-green-500"
+                      />
+                      <span className="ml-2 text-gray-600">Yes</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input 
+                        type="radio" 
+                        name="returnable" 
+                        value="No" 
+                        className="form-radio h-5 w-5 text-red-500 border-gray-300 focus:ring-red-500"
+                      />
+                      <span className="ml-2 text-gray-600">No</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Item Image</label>
+                  <input 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                    type="file" 
+                    name="itemImage"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="flex justify-center">
+          <button
+            onClick={addMoreItems}
+            className="inline-flex items-center px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Add More Items
+          </button>
+        </div>
+
+        {/* Location and Executive Officer Card */}
+        <div className="bg-white rounded-lg shadow-md mt-8 overflow-hidden">
+          <div className="bg-blue-600 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white flex items-center">
+              <Info className="mr-2 h-5 w-5" />
+              Location and Executive Officer Details
+            </h2>
+          </div>
+          <div className="px-6 py-4">
+            
+            {/* Location Dropdown */}
+            <div className="mb-4">
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700">In Location</label>
+              <select
+                id="location"
+                name="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">-- Select Location --</option>
+                <option value="location1">Location 1</option>
+                <option value="location2">Location 2</option>
+                <option value="location3">Location 3</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700">Out Location</label>
+              <select
+                id="location"
+                name="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">-- Select Location --</option>
+                <option value="location1">Location 1</option>
+                <option value="location2">Location 2</option>
+                <option value="location3">Location 3</option>
+              </select>
+            </div>
+
+            {/* Executive Officer Name Dropdown */}
+            <div className="mb-4">
+              <label htmlFor="executive-officer" className="block text-sm font-medium text-gray-700">Executive Officer Name</label>
+              <select
+                id="executive-officer"
+                name="executive-officer"
+                value={executiveOfficer}
+                onChange={(e) => setExecutiveOfficer(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="mr-janaka">Mr. Janaka</option>
+                <option value="mr-perera">Mr. Perera</option>
+                <option value="mr-dilan">Mr. Dilan</option>
+                <option value="mr-saman">Mr. Saman</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Receiver Available Card */}
+        <div className="bg-white rounded-lg shadow-md mt-8 overflow-hidden">
+          <div className="bg-blue-600 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white flex items-center">
+              <Info className="mr-2 h-5 w-5" />
+              Receiver Availability
+            </h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Is Receiver Available?</label>
+              <div className="flex gap-6 mt-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="receiver-available"
+                    value="yes"
+                    className="form-radio h-5 w-5 text-green-500 border-gray-300 focus:ring-green-500"
+                  />
+                  <span className="ml-2 text-gray-600">Yes</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="receiver-available"
+                    value="no"
+                    className="form-radio h-5 w-5 text-red-500 border-gray-300 focus:ring-red-500"
+                  />
+                  <span className="ml-2 text-gray-600">No</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="text-right mt-8">
+          <button 
+            className="inline-flex items-right px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Submit Request
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default NewRequest;
