@@ -455,7 +455,7 @@ function Edititem() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-8">
+          <div className="bg-gradient-to-r from-green-500 to-teal-500 p-8">
             <h2 className="text-3xl font-bold text-white">Edit Item</h2>
             <p className="text-purple-100 mt-1">Update the details of your item</p>
           </div>
