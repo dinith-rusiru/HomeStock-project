@@ -37,7 +37,6 @@
 
 // export default Itemtable;
 
-
 //taking data from the backend
 
 import React, { useEffect, useState, useRef } from "react";
@@ -79,8 +78,9 @@ function Itemtable() {
   const handleSearch = () => {
     fetchHandler().then((data) => {
       const filterGshoppers = data.gshoppers.filter((gshopper) =>
-        Object.values(gshopper).some((field) =>
-          field.toString().toLowerCase().includes(searchQuery.toLowerCase()) // Corrected typo
+        Object.values(gshopper).some(
+          (field) =>
+            field.toString().toLowerCase().includes(searchQuery.toLowerCase()) // Corrected typo
         )
       );
       setGshoppers(filterGshoppers);
@@ -100,20 +100,18 @@ function Itemtable() {
 
           <div className="p-8 " ref={ComponentRef}>
             {/* Search Bar */}
+
             <div className="mb-6">
               <input
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleSearch(e.target.value); // Call the search function directly
+                }}
                 type="text"
                 name="search"
                 placeholder="Search"
-                className="w-75 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 float"
+                className="w-75 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button
-                onClick={handleSearch}
-                className="ml-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
-              >
-                Search
-              </button>
             </div>
 
             {noResults ? (
