@@ -37,6 +37,7 @@
 
 // export default Itemtable;
 
+
 //taking data from the backend
 
 import React, { useEffect, useState, useRef } from "react";
@@ -50,15 +51,21 @@ const URL = "http://localhost:5000/gshoppers";
 function Itemtable() {
   const [gshoppers, setGshoppers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
   const [noResults, setNoResults] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchHandler = async () => {
     try {
       const response = await axios.get(URL);
       setGshoppers(response.data.gshoppers);
-      return response.data; // Return data for search functionality
+      setFilteredItems(response.data.gshoppers); // Initialize filteredItems with all data
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setError("Failed to fetch data. Please try again later.");
+      setLoading(false);
     }
   };
 
@@ -70,23 +77,38 @@ function Itemtable() {
   const ComponentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => ComponentRef.current,
-    documentTitle: "Home Stock - Item Table", // Corrected typo
-    onAfterPrint: () => alert("Item table Report Successfully Downloaded"), // Corrected typo
+    documentTitle: "Home Stock - Item Table",
+    onAfterPrint: () => alert("Item table report successfully downloaded!"),
   });
 
   // Search Function
-  const handleSearch = () => {
-    fetchHandler().then((data) => {
-      const filterGshoppers = data.gshoppers.filter((gshopper) =>
-        Object.values(gshopper).some(
-          (field) =>
-            field.toString().toLowerCase().includes(searchQuery.toLowerCase()) // Corrected typo
-        )
-      );
-      setGshoppers(filterGshoppers);
-      setNoResults(filterGshoppers.length === 0); // Corrected typo
-    });
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (!query) {
+      setFilteredItems(gshoppers); // If search is cleared, show all items
+      setNoResults(false);
+      return;
+    }
+
+    const filtered = gshoppers.filter((gshopper) =>
+      Object.values(gshopper).some((value) =>
+        value.toString().toLowerCase().includes(query)
+      )
+    );
+
+    setFilteredItems(filtered);
+    setNoResults(filtered.length === 0);
   };
+
+  if (loading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -95,18 +117,15 @@ function Itemtable() {
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
             <h2 className="text-3xl font-bold text-white">Item Table</h2>
-            <p className="text-blue-100 mt-1 ">View and manage your items</p>
+            <p className="text-blue-100 mt-1">View and manage your items</p>
           </div>
 
-          <div className="p-8 " ref={ComponentRef}>
+          <div className="p-8" ref={ComponentRef}>
             {/* Search Bar */}
-
             <div className="mb-6">
               <input
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  handleSearch(e.target.value); // Call the search function directly
-                }}
+                value={searchQuery}
+                onChange={handleSearch}
                 type="text"
                 name="search"
                 placeholder="Search"
@@ -116,7 +135,7 @@ function Itemtable() {
 
             {noResults ? (
               <div className="text-center text-gray-600">
-                <p>No Grocery shoppers Found</p>
+                <p>No grocery shoppers found.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -145,14 +164,13 @@ function Itemtable() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {gshoppers &&
-                      gshoppers.map((gshopper, i) => (
-                        <Itemtabledetails
-                          key={i}
-                          gshopper={gshopper}
-                          refreshData={fetchHandler}
-                        />
-                      ))}
+                    {filteredItems.map((gshopper, i) => (
+                      <Itemtabledetails
+                        key={i}
+                        gshopper={gshopper}
+                        refreshData={fetchHandler}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
