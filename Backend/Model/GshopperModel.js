@@ -23,7 +23,17 @@ const gshopperSchema = new Schema({
     expdate:{
         type:Date, //datatype
         required:true, //validate
-    } 
+    },
+    // // CHANGE: Made usagedate optional to handle both inventory items and usage records
+    // usagedate: {
+    //     type: Date,
+    //     required: false, // Changed from true to false
+    // },
+    // // CHANGE: Made notes optional
+    // notes: {
+    //     type: String,
+    //     required: false,
+    // }
 });
 
 module.exports = mongoose.model(
