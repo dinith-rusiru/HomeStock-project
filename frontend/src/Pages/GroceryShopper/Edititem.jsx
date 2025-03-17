@@ -45,11 +45,20 @@ function Edititem() {
       .then((res) => res.data);
   };
 
-  // Handle input changes
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "qty") {
+      const qtyValue = Number(value);
+      if (qtyValue <= 0) {
+        toast.error("Quantity must be greater than zero.");
+        return;
+      }
+    }
+
     setInputs((preState) => ({
       ...preState,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -104,13 +113,18 @@ function Edititem() {
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-green-500 to-teal-500 p-8">
             <h2 className="text-3xl font-bold text-white">Edit Item</h2>
-            <p className="text-purple-100 mt-1">Update the details of your item</p>
+            <p className="text-purple-100 mt-1">
+              Update the details of your item
+            </p>
           </div>
 
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="name"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Item Name
                 </label>
                 <input
@@ -126,7 +140,10 @@ function Edititem() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="qty" className="text-sm font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="qty"
+                    className="text-sm font-medium text-gray-700 block mb-2"
+                  >
                     Quantity
                   </label>
                   <input
@@ -135,13 +152,18 @@ function Edititem() {
                     name="qty"
                     value={inputs.qty}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                    className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                    placeholder="Enter quantity"
                     required
+                    min="1" 
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="importantlevel" className="text-sm font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="importantlevel"
+                    className="text-sm font-medium text-gray-700 block mb-2"
+                  >
                     Importance Level
                   </label>
                   <select
@@ -155,7 +177,11 @@ function Edititem() {
                     <option value="">Select level (1-5)</option>
                     {[1, 2, 3, 4, 5].map((level) => (
                       <option key={level} value={level}>
-                        {level === 1 ? "1 - Low" : level === 5 ? "5 - High" : level}
+                        {level === 1
+                          ? "1 - Low"
+                          : level === 5
+                          ? "5 - High"
+                          : level}
                       </option>
                     ))}
                   </select>
@@ -163,7 +189,10 @@ function Edititem() {
               </div>
 
               <div>
-                <label htmlFor="category" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="category"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Category
                 </label>
                 <div className="relative">
@@ -183,15 +212,26 @@ function Edititem() {
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      ></path>
                     </svg>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="expdate" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="expdate"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Expiration Date
                 </label>
                 <input
