@@ -26,12 +26,62 @@ function Additem() {
     "Beverages",
   ];
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "qty") {
+  //     const qtyValue = Number(value);
+  //     if (qtyValue <= 0) {
+  //       toast.error("Quantity must be greater than zero.");
+  //       return;
+  //     }
+  //   }
+
+  //   setInputs((preState) => ({
+  //     ...preState,
+  //     [name]: value,
+  //   }));
+  // };
+
+
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+  
+    if (name === "qty") {
+      const qtyValue = Number(value);
+      if (qtyValue <= 0) {
+        toast.error("Quantity must be greater than zero.");
+        return;
+      }
+    }
+  
+    if (name === "expdate") {
+      const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+      if (value < today) {
+        toast.error("Expiration date cannot be in the past.");
+        return;
+      }
+    }
+  
     setInputs((preState) => ({
       ...preState,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
+  
+
+
+
+
+
+
+
+
+
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,10 +97,10 @@ function Additem() {
         importantlevel: Number(inputs.importantlevel),
         expdate: inputs.expdate,
       });
-      
+
       // Show success notification
       toast.success("Item added to item table!", {
-        position: "top-right",   // This sets the toast position to the top right
+        position: "top-right", // This sets the toast position to the top right
         autoClose: 2000, // Closes after 2 seconds
         hideProgressBar: false,
         closeOnClick: true,
@@ -60,7 +110,7 @@ function Additem() {
       });
 
       // Redirect after a delay
-      // setTimeout(() => {        
+      // setTimeout(() => {
       //   history("/itemtable");        // navigate to item table page after added to item table page
       // }, 2000);
     } catch (error) {
@@ -73,7 +123,6 @@ function Additem() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Nav />
       <ToastContainer /> {/* Notification Container */}
-
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8">
@@ -86,7 +135,10 @@ function Additem() {
           <div className="p-10">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <label htmlFor="name" className="text-base font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="name"
+                  className="text-base font-medium text-gray-700 block mb-2"
+                >
                   Item Name
                 </label>
                 <input
@@ -103,9 +155,13 @@ function Additem() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label htmlFor="qty" className="text-base font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="qty"
+                    className="text-base font-medium text-gray-700 block mb-2"
+                  >
                     Quantity
                   </label>
+
                   <input
                     type="number"
                     id="qty"
@@ -113,13 +169,17 @@ function Additem() {
                     value={inputs.qty}
                     onChange={handleChange}
                     className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-                    placeholder="0"
+                    placeholder="Enter quantity"
                     required
+                    min="1"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="importantlevel" className="text-base font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="importantlevel"
+                    className="text-base font-medium text-gray-700 block mb-2"
+                  >
                     Importance Level
                   </label>
                   <select
@@ -133,7 +193,11 @@ function Additem() {
                     <option value="">Select priority (1-5)</option>
                     {[1, 2, 3, 4, 5].map((level) => (
                       <option key={level} value={level}>
-                        {level === 1 ? "1 - Low" : level === 5 ? "5 - High" : level}
+                        {level === 1
+                          ? "1 - Low"
+                          : level === 5
+                          ? "5 - High"
+                          : level}
                       </option>
                     ))}
                   </select>
@@ -142,7 +206,10 @@ function Additem() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label htmlFor="category" className="text-base font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="category"
+                    className="text-base font-medium text-gray-700 block mb-2"
+                  >
                     Category
                   </label>
                   <div className="relative">
@@ -165,17 +232,39 @@ function Additem() {
                 </div>
 
                 <div>
-                  <label htmlFor="expdate" className="text-base font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="expdate"
+                    className="text-base font-medium text-gray-700 block mb-2"
+                  >
                     Expiration Date
                   </label>
-                  <input
+                  {/* <input
                     type="date"
                     id="expdate"
                     name="expdate"
                     value={inputs.expdate}
                     onChange={handleChange}
                     className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-                  />
+                  /> */}
+
+
+
+
+
+
+
+
+<input
+  type="date"
+  id="expdate"
+  name="expdate"
+  value={inputs.expdate}
+  onChange={handleChange}
+  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+  min={new Date().toISOString().split("T")[0]} // Prevents selecting past dates
+  required
+/>
+
                 </div>
               </div>
 
