@@ -26,9 +26,28 @@ function Additem() {
     "Beverages",
   ];
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "qty") {
+  //     const qtyValue = Number(value);
+  //     if (qtyValue <= 0) {
+  //       toast.error("Quantity must be greater than zero.");
+  //       return;
+  //     }
+  //   }
+
+  //   setInputs((preState) => ({
+  //     ...preState,
+  //     [name]: value,
+  //   }));
+  // };
+
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+  
     if (name === "qty") {
       const qtyValue = Number(value);
       if (qtyValue <= 0) {
@@ -36,12 +55,33 @@ function Additem() {
         return;
       }
     }
-
+  
+    if (name === "expdate") {
+      const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+      if (value < today) {
+        toast.error("Expiration date cannot be in the past.");
+        return;
+      }
+    }
+  
     setInputs((preState) => ({
       ...preState,
       [name]: value,
     }));
   };
+  
+
+
+
+
+
+
+
+
+
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -198,14 +238,33 @@ function Additem() {
                   >
                     Expiration Date
                   </label>
-                  <input
+                  {/* <input
                     type="date"
                     id="expdate"
                     name="expdate"
                     value={inputs.expdate}
                     onChange={handleChange}
                     className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-                  />
+                  /> */}
+
+
+
+
+
+
+
+
+<input
+  type="date"
+  id="expdate"
+  name="expdate"
+  value={inputs.expdate}
+  onChange={handleChange}
+  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+  min={new Date().toISOString().split("T")[0]} // Prevents selecting past dates
+  required
+/>
+
                 </div>
               </div>
 
