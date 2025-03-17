@@ -45,31 +45,9 @@ function Edititem() {
       .then((res) => res.data);
   };
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-
-  //   if (name === "qty") {
-  //     const qtyValue = Number(value);
-  //     if (qtyValue <= 0) {
-  //       toast.error("Quantity must be greater than zero.");
-  //       return;
-  //     }
-  //   }
-
-  //   setInputs((preState) => ({
-  //     ...preState,
-  //     [name]: value,
-  //   }));
-  // };
-
-
-
-
-
-
- const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "qty") {
       const qtyValue = Number(value);
       if (qtyValue <= 0) {
@@ -77,7 +55,7 @@ function Edititem() {
         return;
       }
     }
-  
+
     if (name === "expdate") {
       const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
       if (value < today) {
@@ -85,30 +63,12 @@ function Edititem() {
         return;
       }
     }
-  
+
     setInputs((preState) => ({
       ...preState,
       [name]: value,
     }));
   };
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -203,7 +163,7 @@ function Edititem() {
                     className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
                     placeholder="Enter quantity"
                     required
-                    min="1" 
+                    min="1"
                   />
                 </div>
 
@@ -282,31 +242,17 @@ function Edititem() {
                 >
                   Expiration Date
                 </label>
-                {/* <input
+
+                <input
                   type="date"
                   id="expdate"
                   name="expdate"
                   value={inputs.expdate}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                /> */}
-
-
-
-
-
-
-
-<input
-  type="date"
-  id="expdate"
-  name="expdate"
-  value={inputs.expdate}
-  onChange={handleChange}
-  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-  min={new Date().toISOString().split("T")[0]} // Prevents selecting past dates
-  required
-/>
+                  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                  min={new Date().toISOString().split("T")[0]} // Prevents selecting past dates
+                  required
+                />
               </div>
 
               <div className="flex gap-4 pt-4">
