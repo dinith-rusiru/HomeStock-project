@@ -75,7 +75,7 @@ function Itemtabledetails({ gshopper, refreshData }) {
       <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
         <Link
           to={`/itemtable/${id}`}
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md"
+          className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm font-medium rounded-lg hover:from-green-600 hover:to-teal-600 transition-all shadow-md"
         >
           Update
         </Link>
