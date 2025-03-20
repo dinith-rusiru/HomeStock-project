@@ -11,7 +11,7 @@ import Additem from "./Pages/GroceryShopper/Additem";
 import EditItem from "./Pages/GroceryShopper/Edititem";
 import Addusage from "./Pages/FamilyMember/Addusage";
 import Usagetableupdatedel from "./Pages/FamilyMember/Usagetableupdatedel"
-import editusage from "./Pages/FamilyMember/Editusage";
+
 import Editusage from "./Pages/FamilyMember/Editusage";
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
           <Route path="/itemtable/:id" element={<EditItem/>}/>
           <Route path="/addusage" element={<Addusage/>}/>
           <Route path="/usagetableupdatedel" element={<Usagetableupdatedel/>}/>
-          <Route path="/editusage" element={<Editusage/>}/>
+          <Route path="/editusage/:id" element={<Editusage/>}/>
         </Routes>
       </React.Fragment>
     </div> 

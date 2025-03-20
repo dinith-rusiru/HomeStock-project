@@ -72,15 +72,15 @@ function Inventory() {
   const badgeStyle = (importanceLevel) => {
     switch (importanceLevel) {
       case 5:
-        return "bg-red-600 text-xl px-4 py-2"; // very large for highest priority
+        return "bg-red-500 text-xl px-4 py-2"; // very large for highest priority
       case 4:
         return "bg-red-400 text-lg px-3 py-2"; // large for critical
       case 3:
         return "bg-orange-400 text-md px-3 py-1"; // medium for high
       case 2:
-        return "bg-yellow-400 text-md px-2 py-1"; // smaller for medium
+        return "bg-yellow-500 text-md px-2 py-1"; // smaller for medium
       case 1:
-        return "bg-yellow-00 text-md px-2 py-1";
+        return "bg-yellow-300 text-md px-2 py-1";
       default:
         return "bg-green-400 text-sm px-2 py-1"; // small for low
     }
