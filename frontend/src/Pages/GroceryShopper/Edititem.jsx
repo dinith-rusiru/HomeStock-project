@@ -1,157 +1,10 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import Nav from "../../Component/Nav";
-// import { Link, useParams } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
-
-// function Edititem() {
-//   const [inputs, setInputs] = useState({
-//     name: "",
-//     qty: "",
-//     category: "",
-//     importantlevel: "",
-//     expdate: "",
-//   });
-//   const history = useNavigate();
-//   const id = useParams().id;
-
-//   useEffect(() => {
-//     const fetchHandler = async () => {
-//       try {
-//         const res = await axios.get(`http://localhost:5000/gshoppers/${id}`);
-//         if (res.data.gshopper) {
-//           setInputs(res.data.gshopper);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching data:", error);
-//       }
-//     };
-//     fetchHandler();
-//   }, [id]);
-
-//   const sendRequest = async () => {
-//     await axios
-//       .put(`http://Localhost:5000/gshoppers/${id}`, {
-//         name: String(inputs.name),
-//         qty: Number(inputs.qty),
-//         category: String(inputs.category),
-//         importantlevel: Number(inputs.importantlevel),
-//         expdate: String(inputs.expdate),
-//       })
-//       .then((res) => res.data);
-//   };
-
-//   const handleChange = (e) => {
-//     setInputs((preState) => ({
-//       ...preState,
-//       [e.target.name]: e.target.value,
-//     }));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     console.log(inputs);
-//     sendRequest().then(() => history("/itemtable"));
-//   };
-
-//   //item categories
-//   const categories = [
-//     "Kitchen Items",
-//     "Home Essentials",
-//     "Foods",
-//     "Electronics",
-//     "Cleaning Supplies",
-//     "Personal Care",
-//     "Stationery",
-//     "Beverages",
-//   ];
-
-//   return (
-//     <div>
-//       <Nav />
-//       <h1>Edit Item</h1>
-//       <form onSubmit={handleSubmit}>
-//         <div>
-//           <label>Name:</label>
-//           <input
-//             type="text"
-//             name="name"
-//             value={inputs.name}
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <div className="mb-3">
-//           <label>Quantity:</label>
-//           <input
-//             type="number"
-//             name="qty"
-//             value={inputs.qty}
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <div className="mb-3">
-//           <label>Category:</label>
-//           <select
-//             name="category"
-//             value={inputs.category}
-//             onChange={handleChange}
-//           >
-//             <option value="">Select a category</option>
-//             {categories.map((cat, index) => (
-//               <option key={index} value={cat}>
-//                 {cat}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div>
-//           <label>Important Level:</label>
-//           <select
-//             name="importantlevel"
-//             value={inputs.importantlevel}
-//             onChange={handleChange}
-//           >
-//             <option value="">Select level (1-5)</option>
-//             {[1, 2, 3, 4, 5].map((level) => (
-//               <option key={level} value={level}>
-//                 {level}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div>
-//           <label>Expiration Date:</label>
-//           <input
-//             type="date"
-//             name="expdate"
-//             value={inputs.expdate}
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <button type="submit">Update</button>
-//         <Link to={"/itemtable"}>
-//           <button>cancel</button>
-//         </Link>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default Edititem;
-
-
-
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Nav from "../../Component/Nav";
 import { Link, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify"; // import ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // import toast styles
 
 function Edititem() {
   const [inputs, setInputs] = useState({
@@ -164,6 +17,7 @@ function Edititem() {
   const history = useNavigate();
   const id = useParams().id;
 
+  // Fetch item data on component mount
   useEffect(() => {
     const fetchHandler = async () => {
       try {
@@ -178,9 +32,10 @@ function Edititem() {
     fetchHandler();
   }, [id]);
 
+  // Send update request
   const sendRequest = async () => {
     await axios
-      .put(`http://Localhost:5000/gshoppers/${id}`, {
+      .put(`http://localhost:5000/gshoppers/${id}`, {
         name: String(inputs.name),
         qty: Number(inputs.qty),
         category: String(inputs.category),
@@ -191,19 +46,58 @@ function Edititem() {
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "qty") {
+      const qtyValue = Number(value);
+      if (qtyValue <= 0) {
+        toast.error("Quantity must be greater than zero.");
+        return;
+      }
+    }
+
+    if (name === "expdate") {
+      const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+      if (value < today) {
+        toast.error("Expiration date cannot be in the past.");
+        return;
+      }
+    }
+
     setInputs((preState) => ({
       ...preState,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(inputs);
-    sendRequest().then(() => history("/itemtable"));
+    try {
+      await sendRequest();
+      toast.success("Item Updated!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Navigate to item table after 2 seconds
+      setTimeout(() => {
+        history("/itemtable");
+      }, 2000);
+    } catch (error) {
+      toast.error("Error updating item!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
-  //item categories
+  // Categories for select dropdown
   const categories = [
     "Kitchen Items",
     "Home Essentials",
@@ -217,19 +111,28 @@ function Edititem() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Add ToastContainer here */}
+      <ToastContainer />
+
+      {/* Your Nav component */}
       <Nav />
-      
+
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-500 to-teal-500 p-8">
             <h2 className="text-3xl font-bold text-white">Edit Item</h2>
-            <p className="text-purple-100 mt-1">Update the details of your item</p>
+            <p className="text-purple-100 mt-1">
+              Update the details of your item
+            </p>
           </div>
-          
+
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="name"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Item Name
                 </label>
                 <input
@@ -245,7 +148,10 @@ function Edititem() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="qty" className="text-sm font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="qty"
+                    className="text-sm font-medium text-gray-700 block mb-2"
+                  >
                     Quantity
                   </label>
                   <input
@@ -254,13 +160,18 @@ function Edititem() {
                     name="qty"
                     value={inputs.qty}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                    className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                    placeholder="Enter quantity"
                     required
+                    min="1"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="importantlevel" className="text-sm font-medium text-gray-700 block mb-2">
+                  <label
+                    htmlFor="importantlevel"
+                    className="text-sm font-medium text-gray-700 block mb-2"
+                  >
                     Importance Level
                   </label>
                   <select
@@ -274,7 +185,11 @@ function Edititem() {
                     <option value="">Select level (1-5)</option>
                     {[1, 2, 3, 4, 5].map((level) => (
                       <option key={level} value={level}>
-                        {level === 1 ? "1 - Low" : level === 5 ? "5 - High" : level}
+                        {level === 1
+                          ? "1 - Low"
+                          : level === 5
+                          ? "5 - High"
+                          : level}
                       </option>
                     ))}
                   </select>
@@ -282,7 +197,10 @@ function Edititem() {
               </div>
 
               <div>
-                <label htmlFor="category" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="category"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Category
                 </label>
                 <div className="relative">
@@ -302,35 +220,49 @@ function Edititem() {
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      ></path>
                     </svg>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="expdate" className="text-sm font-medium text-gray-700 block mb-2">
+                <label
+                  htmlFor="expdate"
+                  className="text-sm font-medium text-gray-700 block mb-2"
+                >
                   Expiration Date
                 </label>
+
                 <input
                   type="date"
                   id="expdate"
                   name="expdate"
                   value={inputs.expdate}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                  min={new Date().toISOString().split("T")[0]} // Prevents selecting past dates
+                  required
                 />
               </div>
 
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white font-medium py-3 px-4 rounded-lg hover:from-green-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
                 >
                   Update Item
                 </button>
-                
+
                 <Link to="/itemtable" className="flex-1">
                   <button
                     type="button"
