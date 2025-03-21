@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Nav from "../../Component/Nav";
 import axios from "axios";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function EditUsage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  
-  // State for form inputs
+  const location = useLocation();
+
   const [inputs, setInputs] = useState({
     name: "",
     qty: "",
@@ -15,325 +17,400 @@ function EditUsage() {
     usagedate: "",
     notes: "",
   });
-  
-  // Original data before edits to calculate quantity differences
+
   const [originalData, setOriginalData] = useState({
     name: "",
     qty: 0,
+    category: "",
+    usagedate: "",
+    notes: "",
   });
-  
-  // State for inventory items
+
   const [items, setItems] = useState([]);
-  
-  // State for selected item
-  const [selectedItem, setSelectedItem] = useState(null);
-  
-  // State for validation errors
+  const [availableQty, setAvailableQty] = useState(0);
   const [errors, setErrors] = useState({});
 
-  // Fetch the usage data to edit
   useEffect(() => {
-    const fetchUsageData = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/fmembers/${id}`);
-        if (res.data.fmember) {
-          setInputs(res.data.fmember);
-          setOriginalData({
-            name: res.data.fmember.name,
-            qty: res.data.fmember.qty,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching usage data:", error);
-      }
-    };
-    fetchUsageData();
+    if (location.state && location.state.fmember) {
+      const { name, qty, category, usagedate, notes } = location.state.fmember;
+      setInputs({ name, qty, category, usagedate, notes });
+      setOriginalData({ name, qty, category, usagedate, notes });
+    } else {
+      fetchUsageData();
+    }
   }, [id]);
 
-  // Fetch all inventory items
+  const fetchUsageData = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/fmembers/${id}`);
+      if (res.data.fmember) {
+        setInputs(res.data.fmember);
+        setOriginalData(res.data.fmember);
+      } else {
+        toast.error("Usage data not found!");
+      }
+    } catch (error) {
+      toast.error("Error loading usage data!");
+    }
+  };
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const response = await axios.get("http://localhost:5000/gshoppers");
         setItems(response.data.gshoppers || []);
       } catch (error) {
-        console.error("Error fetching items:", error);
+        toast.error("Error loading inventory items!");
       }
     };
     fetchItems();
   }, []);
 
-  // Update selected item when name changes
+  // Update available quantity when item name changes or when items are loaded
   useEffect(() => {
-    if (inputs.name) {
-      const item = items.find(item => item.name === inputs.name);
-      if (item) {
-        setSelectedItem(item);
-        // Auto-fill category from the selected item
-        setInputs(prev => ({
-          ...prev,
-          category: item.category
-        }));
+    if (inputs.name && items.length > 0) {
+      const selectedItem = items.find(item => item.name === inputs.name);
+      if (selectedItem) {
+        // If editing the same item, add the original quantity to available
+        if (originalData.name === inputs.name) {
+          setAvailableQty(selectedItem.qty + Number(originalData.qty));
+        } else {
+          setAvailableQty(selectedItem.qty);
+        }
       }
     }
-  }, [inputs.name, items]);
+  }, [inputs.name, items, originalData.name, originalData.qty]);
+
+  const validateDate = (date) => {
+    // Get today's date (without time)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get one month ago
+    const oneMonthAgo = new Date(today);
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    
+    // Convert input date to Date object
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    // Check if date is in the future
+    if (selectedDate > today) {
+      return "Usage date cannot be in the future";
+    }
+    
+    // Check if date is older than one month
+    if (selectedDate < oneMonthAgo) {
+      return "Usage date cannot be more than one month in the past";
+    }
+    
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate date before submission
+    const dateError = validateDate(inputs.usagedate);
+    if (dateError) {
+      setErrors({...errors, usagedate: dateError});
+      toast.error(dateError);
+      return;
+    }
+
+    // Final validation before submitting
+    if (Number(inputs.qty) <= 0) {
+      toast.error("Quantity must be greater than zero.");
+      return;
+    }
+
+    // Check if new quantity exceeds available quantity
+    if (inputs.name !== originalData.name) {
+      const selectedItem = items.find(item => item.name === inputs.name);
+      if (selectedItem && Number(inputs.qty) > selectedItem.qty) {
+        toast.error(`Quantity exceeds available stock of ${selectedItem.qty}.`);
+        return;
+      }
+    } else {
+      // If same item, check if the new quantity is valid considering the original quantity
+      const selectedItem = items.find(item => item.name === inputs.name);
+      const maxAvailable = selectedItem ? (selectedItem.qty + Number(originalData.qty)) : 0;
+      if (Number(inputs.qty) > maxAvailable) {
+        toast.error(`Quantity exceeds available stock of ${maxAvailable}.`);
+        return;
+      }
+    }
+
+    try {
+      // First, handle the original item if the name has changed
+      if (originalData.name !== inputs.name) {
+        // Return the original qty to the original item's inventory
+        await updateItemInventory(originalData.name, originalData.qty, "add");
+        
+        // Deduct the new qty from the newly selected item's inventory
+        await updateItemInventory(inputs.name, inputs.qty, "subtract");
+      } else {
+        // If same item, just handle the qty difference
+        const qtyDifference = Number(originalData.qty) - Number(inputs.qty);
+        if (qtyDifference !== 0) {
+          // If positive, add back to inventory; if negative, subtract from inventory
+          await updateItemInventory(inputs.name, Math.abs(qtyDifference), qtyDifference > 0 ? "add" : "subtract");
+        }
+      }
+
+      // Update the usage record
+      await axios.put(`http://localhost:5000/fmembers/${id}`, {
+        name: inputs.name,
+        qty: Number(inputs.qty),
+        category: inputs.category,
+        usagedate: inputs.usagedate,
+        notes: inputs.notes,
+      });
+
+      toast.success("Usage Updated Successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Navigate to usage table after 2 seconds
+      setTimeout(() => {
+        navigate("/usagetable");
+      }, 2000);
+    } catch (error) {
+      toast.error("Failed to update usage!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  const updateItemInventory = async (itemName, quantity, action) => {
+    try {
+      const response = await axios.get("http://localhost:5000/gshoppers");
+      const existingItem = response.data.gshoppers.find((item) => item.name === itemName);
+
+      if (existingItem) {
+        // Calculate new quantity based on action (add or subtract)
+        const newQty = action === "add" 
+          ? existingItem.qty + Number(quantity)
+          : existingItem.qty - Number(quantity);
+        
+        // Ensure quantity doesn't go negative
+        const finalQty = Math.max(0, newQty);
+        
+        await axios.put(`http://localhost:5000/gshoppers/${existingItem._id}`, {
+          name: existingItem.name,
+          qty: finalQty,
+          category: existingItem.category,
+          importantlevel: existingItem.importantlevel,
+          expdate: existingItem.expdate,
+        });
+      } else if (action === "add") {
+        // Only create a new item if we're adding inventory
+        // This is for the case where we need to add back qty to an item that might have been deleted
+        const categoryToUse = inputs.category || "Uncategorized";
+        await axios.post("http://localhost:5000/gshoppers", {
+          name: itemName,
+          qty: Number(quantity),
+          category: categoryToUse,
+          importantlevel: 3, // Default importance level
+          expdate: new Date().toISOString().split("T")[0], // Today's date as default
+        });
+      }
+    } catch (error) {
+      console.error("Error updating inventory:", error);
+      toast.error("Error updating inventory!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     // Clear errors when field is changed
     setErrors(prev => ({...prev, [name]: ""}));
-    
-    setInputs((prevState) => ({
+
+    if (name === "qty") {
+      const qtyValue = Number(value);
+      
+      // Validate quantity is greater than zero
+      if (qtyValue <= 0) {
+        toast.error("Quantity must be greater than zero.");
+        return;
+      }
+      
+      // Validate quantity doesn't exceed available stock
+      if (qtyValue > availableQty) {
+        toast.error(`Quantity exceeds available stock of ${availableQty}.`);
+        // Still update the input but validation will prevent form submission
+      }
+    }
+
+    // If changing the item name, update the category based on the selected item
+    if (name === "name") {
+      const selectedItem = items.find(item => item.name === value);
+      if (selectedItem) {
+        // Calculate available quantity considering original quantity if editing same item
+        let newAvailableQty = selectedItem.qty;
+        if (originalData.name === value) {
+          newAvailableQty += Number(originalData.qty);
+        }
+        setAvailableQty(newAvailableQty);
+        
+        setInputs(prevState => ({
+          ...prevState,
+          [name]: value,
+          category: selectedItem.category, // Update category when item changes
+          // Reset quantity if it exceeds the available amount
+          qty: Number(prevState.qty) > newAvailableQty ? "" : prevState.qty
+        }));
+        return;
+      }
+    }
+
+    // Validate usage date when changed
+    if (name === "usagedate") {
+      const dateError = validateDate(value);
+      if (dateError) {
+        setErrors({...errors, usagedate: dateError});
+        toast.error(dateError);
+        // Still update the input but validation will prevent form submission
+      }
+    }
+
+    setInputs(prevState => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!inputs.name) {
-      newErrors.name = "Please select an item";
-    }
-    
-    if (Number(inputs.qty) <= 0) {
-      newErrors.qty = "Quantity must be greater than 0";
-    }
-    
-    // Check if quantity is valid for the new item if item name changed
-    if (inputs.name !== originalData.name) {
-      const newItem = items.find(item => item.name === inputs.name);
-      if (newItem && Number(inputs.qty) > newItem.qty) {
-        newErrors.qty = `Maximum available quantity is ${newItem.qty}`;
-      }
-    } else {
-      // If same item, check if the new quantity is greater than original + available
-      const currentItem = items.find(item => item.name === inputs.name);
-      if (currentItem) {
-        const maxAvailable = currentItem.qty + Number(originalData.qty);
-        if (Number(inputs.qty) > maxAvailable) {
-          newErrors.qty = `Maximum available quantity is ${maxAvailable}`;
-        }
-      }
-    }
-    
-    if (!inputs.usagedate) {
-      newErrors.usagedate = "Please select a date";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Get today's date in YYYY-MM-DD format for max attribute
+  const todayFormatted = new Date().toISOString().split('T')[0];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validate form before submission
-    if (!validateForm()) {
-      return;
-    }
-    
-    try {
-      // Update the usage record
-      await updateUsageRecord();
-      
-      // Update inventory quantities
-      await updateInventoryQuantities();
-      
-      // Redirect to usage table
-      navigate("/usagetable");
-    } catch (error) {
-      console.error("Error updating usage:", error);
-    }
-  };
-
-  // Update the usage record in FmemberModel
-  const updateUsageRecord = async () => {
-    return await axios.put(`http://localhost:5000/fmembers/${id}`, {
-      name: String(inputs.name),
-      qty: Number(inputs.qty),
-      category: String(inputs.category),
-      usagedate: String(inputs.usagedate),
-      notes: String(inputs.notes),
-    });
-  };
-
-  // Update inventory quantities based on changes
-  const updateInventoryQuantities = async () => {
-    // If the item name changed, we need to:
-    // 1. Return the original quantity to the original item
-    // 2. Take the new quantity from the new item
-    if (inputs.name !== originalData.name) {
-      // Find the original item to return quantity
-      const originalItem = items.find(item => item.name === originalData.name);
-      if (originalItem) {
-        await axios.put(`http://localhost:5000/gshoppers/${originalItem._id}`, {
-          name: originalItem.name,
-          qty: originalItem.qty + Number(originalData.qty),
-          category: originalItem.category,
-          importantlevel: originalItem.importantlevel || 1,
-          expdate: originalItem.expdate || new Date().toISOString().split('T')[0],
-        });
-      }
-      
-      // Find the new item to subtract quantity
-      const newItem = items.find(item => item.name === inputs.name);
-      if (newItem) {
-        await axios.put(`http://localhost:5000/gshoppers/${newItem._id}`, {
-          name: newItem.name,
-          qty: newItem.qty - Number(inputs.qty),
-          category: newItem.category,
-          importantlevel: newItem.importantlevel || 1,
-          expdate: newItem.expdate || new Date().toISOString().split('T')[0],
-        });
-      }
-    } else {
-      // If the item name is the same, we just need to adjust the quantity based on the difference
-      const currentItem = items.find(item => item.name === inputs.name);
-      if (currentItem) {
-        const quantityDifference = Number(originalData.qty) - Number(inputs.qty);
-        await axios.put(`http://localhost:5000/gshoppers/${currentItem._id}`, {
-          name: currentItem.name,
-          qty: currentItem.qty + quantityDifference,
-          category: currentItem.category,
-          importantlevel: currentItem.importantlevel || 1,
-          expdate: currentItem.expdate || new Date().toISOString().split('T')[0],
-        });
-      }
-    }
-  };
+  // Calculate one month ago date in YYYY-MM-DD format for min attribute
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const oneMonthAgoFormatted = oneMonthAgo.toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Nav Bar at the Top */}
       <Nav />
+      {/* Toast Container */}
+      <ToastContainer />
+
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-8"
+               style={{
+                background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+               }}
+          >
             <h2 className="text-3xl font-bold text-white">Edit Usage</h2>
-            <p className="text-blue-100 mt-1">Update the details of item usage</p>
+            <p className="text-purple-100 mt-1">Update the details of your usage record</p>
           </div>
+
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Item Name Dropdown */}
               <div>
-                <label htmlFor="name" className="text-sm font-medium text-gray-700 block mb-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">
                   Item Name
                 </label>
                 <select
-                  id="name"
                   name="name"
                   value={inputs.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${errors.name ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white`}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 bg-white"
                   required
                 >
                   <option value="">Select an item</option>
-                  {items.length > 0 ? (
-                    items.map((item) => (
-                      <option key={item._id} value={item.name}>
-                        {item.name} (Available: {item.qty})
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Loading items...</option>
-                  )}
+                  {items.map((item) => (
+                    <option key={item._id} value={item.name}>
+                      {item.name} (Available: {item.name === originalData.name ? item.qty + Number(originalData.qty) : item.qty})
+                    </option>
+                  ))}
                 </select>
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
-              {/* Quantity */}
+              {/* Quantity Input */}
               <div>
-                <label htmlFor="qty" className="text-sm font-medium text-gray-700 block mb-2">
-                  Quantity Used
+                <label className="text-sm font-medium text-gray-700 block mb-2">
+                  Quantity (Max Available: {availableQty})
                 </label>
                 <input
                   type="number"
-                  id="qty"
                   name="qty"
                   value={inputs.qty}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${errors.qty ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
-                  placeholder="Enter quantity"
+                  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
                   required
                   min="1"
-                />
-                {errors.qty && <p className="text-red-500 text-sm mt-1">{errors.qty}</p>}
-                {selectedItem && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    {inputs.name === originalData.name 
-                      ? `Available: ${selectedItem.qty + Number(originalData.qty)}`
-                      : `Available: ${selectedItem.qty}`}
-                  </p>
-                )}
-              </div>
-
-              {/* Category - Auto-filled from selected item */}
-              <div>
-                <label htmlFor="category" className="text-sm font-medium text-gray-700 block mb-2">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={inputs.category}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-gray-100"
-                  placeholder="Category will be auto-filled"
-                  readOnly
+                  max={availableQty}
                 />
               </div>
 
               {/* Usage Date */}
               <div>
-                <label htmlFor="usagedate" className="text-sm font-medium text-gray-700 block mb-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">
                   Usage Date
                 </label>
                 <input
                   type="date"
-                  id="usagedate"
                   name="usagedate"
                   value={inputs.usagedate}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${errors.usagedate ? 'border-red-500' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+                  min={oneMonthAgoFormatted}
+                  max={todayFormatted}
+                  className={`w-full px-5 py-4 rounded-lg border ${errors.usagedate ? 'border-red-500' : 'border-gray-300'} focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm`}
                   required
                 />
                 {errors.usagedate && <p className="text-red-500 text-sm mt-1">{errors.usagedate}</p>}
+                <p className="text-sm text-gray-500 mt-1">
+                  Date must be between {oneMonthAgoFormatted} and {todayFormatted}
+                </p>
               </div>
 
-              {/* Notes */}
+              {/* Notes Field */}
               <div>
-                <label htmlFor="notes" className="text-sm font-medium text-gray-700 block mb-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">
                   Notes
                 </label>
                 <textarea
-                  id="notes"
                   name="notes"
                   value={inputs.notes}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                  placeholder="Enter any notes"
+                  className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                  rows="4"
+                  placeholder="Enter any notes (optional)"
                 ></textarea>
               </div>
 
-              {/* Submit and Cancel Buttons */}
+              {/* Update & Cancel Buttons */}
               <div className="flex gap-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
+                <button type="submit"
+                        className="flex-1 text-white font-medium py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
+                        style={{
+                          background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+                        }}
                 >
                   Update Usage
                 </button>
-                
-                <Link to="/usagetable" className="flex-1">
-                  <button
-                    type="button"
-                    className="w-full bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-lg border border-gray-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition transform hover:-translate-y-0.5"
-                  >
-                    Cancel
-                  </button>
-                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/usagetable")}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-medium py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition transform hover:-translate-y-0.5"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
