@@ -14,7 +14,7 @@ const UpdateItem = () => {
 
   const fetchItem = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/list/${id}`);
+      const response = await axios.get(`http://localhost:5000/app/list/${id}`);
       console.log(response.data);  // Log the response to inspect the structure
       setItem(response.data.item); // Correct the state mapping based on response structure
     } catch (error) {
@@ -24,7 +24,7 @@ const UpdateItem = () => {
 
   const handleUpdate = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/list/${id}`, {
+      const response = await axios.put(`http://localhost:5000/app/list/${id}`, {
         qty: item.qty // Only update quantity
       });
       toast.success("Item updated successfully");

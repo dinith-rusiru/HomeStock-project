@@ -19,7 +19,7 @@ app.use("/gshoppers",router);
 // app.use("/usages", router); // Same route handler for usage records
 app.use("/fmembers", fmemberRoutes);
 app.use("/api", userr);
-app.use("/api/list", listManagerRouter);
+app.use("/app/list", listManagerRouter);
 mongoose.connect ("mongodb+srv://admin:le7161C9pwmC89qo@cluster0.fpzv9.mongodb.net/")
 .then(()=>console.log("Connected to mongodb"))
 .then(()=>{

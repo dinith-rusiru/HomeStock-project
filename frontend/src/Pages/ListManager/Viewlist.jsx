@@ -18,7 +18,7 @@ const ViewList = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/list");
+      const response = await axios.get("http://localhost:5000/app/list");
       setItems(response.data.items || response.data);
 
       if (!isFetched) {
