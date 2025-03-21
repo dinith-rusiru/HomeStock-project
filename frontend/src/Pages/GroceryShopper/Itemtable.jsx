@@ -776,6 +776,10 @@
 
 
 
+
+
+
+
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -858,150 +862,151 @@ function Itemtable() {
     }
   };
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
+  //print pdf
+  // const handleDownloadPDF = () => {
+  //   const doc = new jsPDF();
 
-    // Add title with style
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text("Item Table Report", 14, 20);
+  //   // Add title with style
+  //   doc.setFontSize(18);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Item Table Report", 14, 20);
 
-    // Add space after the title
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
+  //   // Add space after the title
+  //   doc.setFontSize(12);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
 
-    // Table header with style
-    const tableHeader = [[
-      "Name", "Quantity", "Category", "Important Level", "Expiry Date"
-    ]];
+  //   // Table header with style
+  //   const tableHeader = [[
+  //     "Name", "Quantity", "Category", "Important Level", "Expiry Date"
+  //   ]];
 
-    // Table data
-    const tableData = filteredItems.map((gshopper) => [
-      gshopper.name,
-      gshopper.qty || "N/A",
-      gshopper.category,
-      gshopper.importantlevel || "N/A",
-      gshopper.expdate ? new Date(gshopper.expdate).toISOString().split("T")[0] : "N/A",
-    ]);
+  //   // Table data
+  //   const tableData = filteredItems.map((gshopper) => [
+  //     gshopper.name,
+  //     gshopper.qty || "N/A",
+  //     gshopper.category,
+  //     gshopper.importantlevel || "N/A",
+  //     gshopper.expdate ? new Date(gshopper.expdate).toISOString().split("T")[0] : "N/A",
+  //   ]);
 
-    // Add table with enhanced styling
-    autoTable(doc, {
-      startY: 40,
-      head: tableHeader,
-      body: tableData,
-      theme: 'striped',
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: [255, 255, 255],
-        fontSize: 12,
-        fontStyle: 'bold',
-        halign: 'center',
-        cellPadding: 5,
-        lineWidth: 0.2,
-      },
-      bodyStyles: {
-        fillColor: [245, 245, 245],
-        textColor: [44, 62, 80],
-        fontSize: 10,
-        cellPadding: 4,
-        halign: "center"
-      },
-      alternateRowStyles: {
-        fillColor: [255, 255, 255],
-      },
-      styles: {
-        overflow: 'linebreak',
-        cellWidth: 'auto',
-        minCellHeight: 12,
-        lineColor: [189, 195, 199],
-        lineWidth: 0.1,
-      },
-      columnStyles: {
-        0: { fontStyle: 'bold', halign: 'left' },
-        1: { halign: 'center' },
-        2: { halign: 'center' },
-        3: { halign: 'center', fontStyle: 'bold' },
-        4: { halign: 'center' }
-      },
-      margin: { top: 10, right: 10, bottom: 10, left: 10 },
-      tableLineWidth: 0.5,
-      tableLineColor: [52, 152, 219],
-      willDrawCell: function (data) {
-        if (data.section === 'body') {
-          const cell = data.cell;
-          const colIndex = data.column.index;
+  //   // Add table with enhanced styling
+  //   autoTable(doc, {
+  //     startY: 40,
+  //     head: tableHeader,
+  //     body: tableData,
+  //     theme: 'striped',
+  //     headStyles: {
+  //       fillColor: [41, 128, 185],
+  //       textColor: [255, 255, 255],
+  //       fontSize: 12,
+  //       fontStyle: 'bold',
+  //       halign: 'center',
+  //       cellPadding: 5,
+  //       lineWidth: 0.2,
+  //     },
+  //     bodyStyles: {
+  //       fillColor: [245, 245, 245],
+  //       textColor: [44, 62, 80],
+  //       fontSize: 10,
+  //       cellPadding: 4,
+  //       halign: "center"
+  //     },
+  //     alternateRowStyles: {
+  //       fillColor: [255, 255, 255],
+  //     },
+  //     styles: {
+  //       overflow: 'linebreak',
+  //       cellWidth: 'auto',
+  //       minCellHeight: 12,
+  //       lineColor: [189, 195, 199],
+  //       lineWidth: 0.1,
+  //     },
+  //     columnStyles: {
+  //       0: { fontStyle: 'bold', halign: 'left' },
+  //       1: { halign: 'center' },
+  //       2: { halign: 'center' },
+  //       3: { halign: 'center', fontStyle: 'bold' },
+  //       4: { halign: 'center' }
+  //     },
+  //     margin: { top: 10, right: 10, bottom: 10, left: 10 },
+  //     tableLineWidth: 0.5,
+  //     tableLineColor: [52, 152, 219],
+  //     willDrawCell: function (data) {
+  //       if (data.section === 'body') {
+  //         const cell = data.cell;
+  //         const colIndex = data.column.index;
 
-          // Style importance levels
-          if (colIndex === 3) {
-            const value = cell.text[0];
-            if (value === 'High') {
-              doc.setFillColor(255, 240, 240);
-              doc.setTextColor(220, 53, 69);
-            } else if (value === 'Medium') {
-              doc.setFillColor(255, 252, 230);
-              doc.setTextColor(255, 153, 0);
-            } else if (value === 'Low') {
-              doc.setFillColor(240, 255, 240);
-              doc.setTextColor(40, 167, 69);
-            }
-          }
+  //         // Style importance levels
+  //         if (colIndex === 3) {
+  //           const value = cell.text[0];
+  //           if (value === 'High') {
+  //             doc.setFillColor(255, 240, 240);
+  //             doc.setTextColor(220, 53, 69);
+  //           } else if (value === 'Medium') {
+  //             doc.setFillColor(255, 252, 230);
+  //             doc.setTextColor(255, 153, 0);
+  //           } else if (value === 'Low') {
+  //             doc.setFillColor(240, 255, 240);
+  //             doc.setTextColor(40, 167, 69);
+  //           }
+  //         }
 
-          // Style expiry dates
-          if (colIndex === 4 && cell.text[0] !== 'N/A') {
-            const expiryDate = new Date(cell.text[0]);
-            const today = new Date();
-            const daysDiff = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+  //         // Style expiry dates
+  //         if (colIndex === 4 && cell.text[0] !== 'N/A') {
+  //           const expiryDate = new Date(cell.text[0]);
+  //           const today = new Date();
+  //           const daysDiff = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
 
-            if (daysDiff < 0) {
-              // Expired
-              doc.setFillColor(255, 200, 200);
-              doc.setTextColor(180, 0, 0);
-            } else if (daysDiff < 30) {
-              // Expiring soon
-              doc.setFillColor(255, 245, 220);
-              doc.setTextColor(217, 119, 6);
-            }
-          }
-        }
-      }
-    });
+  //           if (daysDiff < 0) {
+  //             // Expired
+  //             doc.setFillColor(255, 200, 200);
+  //             doc.setTextColor(180, 0, 0);
+  //           } else if (daysDiff < 30) {
+  //             // Expiring soon
+  //             doc.setFillColor(255, 245, 220);
+  //             doc.setTextColor(217, 119, 6);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
 
-    // Add summary section
-    const finalY = doc.lastAutoTable.finalY || 60;
-    doc.setFontSize(12);
-    doc.setTextColor(41, 128, 185);
-    doc.setFont("helvetica", "bold");
-    doc.text("Inventory Summary", 14, finalY + 15);
+  //   // Add summary section
+  //   const finalY = doc.lastAutoTable.finalY || 60;
+  //   doc.setFontSize(12);
+  //   doc.setTextColor(41, 128, 185);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Inventory Summary", 14, finalY + 15);
 
-    doc.setFontSize(10);
-    doc.setTextColor(44, 62, 80);
-    doc.setFont("helvetica", "normal");
+  //   doc.setFontSize(10);
+  //   doc.setTextColor(44, 62, 80);
+  //   doc.setFont("helvetica", "normal");
 
-    // Calculate summary statistics
-    const totalQuantity = filteredItems.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0);
-    const categoryCounts = {};
-    filteredItems.forEach(item => {
-      categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
-    });
+  //   // Calculate summary statistics
+  //   const totalQuantity = filteredItems.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0);
+  //   const categoryCounts = {};
+  //   filteredItems.forEach(item => {
+  //     categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
+  //   });
 
-    doc.text(`Total Items: ${totalItems}`, 14, finalY + 25);
-    doc.text(`Total Quantity: ${totalQuantity}`, 14, finalY + 35);
+  //   doc.text(`Total Items: ${totalItems}`, 14, finalY + 25);
+  //   doc.text(`Total Quantity: ${totalQuantity}`, 14, finalY + 35);
 
-    // Add page numbers
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width - 20,
-        doc.internal.pageSize.height - 10);
-    }
+  //   // Add page numbers
+  //   const pageCount = doc.internal.getNumberOfPages();
+  //   for (let i = 1; i <= pageCount; i++) {
+  //     doc.setPage(i);
+  //     doc.setFontSize(8);
+  //     doc.setTextColor(100, 100, 100);
+  //     doc.text(`Page ${i} of ${pageCount}`,
+  //       doc.internal.pageSize.width - 20,
+  //       doc.internal.pageSize.height - 10);
+  //   }
 
-    // Save the generated PDF
-    doc.save("ItemTable_Report.pdf");
-  };
+  //   // Save the generated PDF
+  //   doc.save("ItemTable_Report.pdf");
+  // };
 
   // Get importance level badge
   const getImportanceBadge = (level) => {
@@ -1271,7 +1276,7 @@ function Itemtable() {
             <div className="flex space-x-4 mt-6">
               <button
                 className="bg-gradient-to-r from-green-500 to-teal-600 text-white font-medium py-2 px-4 rounded-lg hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5 flex items-center"
-                onClick={handleDownloadPDF}
+                // onClick={handleDownloadPDF}
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
