@@ -310,7 +310,8 @@ function EditUsage() {
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-8"
                style={{
-                background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+                // background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+                background: "linear-gradient(90deg,rgba(7, 24, 73, 0.84) 0%, rgba(23, 122, 172, 0.87) 100%)"
                }}
           >
             <h2 className="text-3xl font-bold text-white">Edit Usage</h2>
@@ -398,7 +399,8 @@ function EditUsage() {
                 <button type="submit"
                         className="flex-1 text-white font-medium py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
                         style={{
-                          background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+                          // background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+                          background: "linear-gradient(90deg,rgba(7, 24, 73, 0.84) 0%, rgba(23, 122, 172, 0.87) 100%)"
                         }}
                 >
                   Update Usage

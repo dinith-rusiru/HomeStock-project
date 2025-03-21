@@ -244,9 +244,9 @@ function Usagetable() {
     const formattedDate = formatDate(date);
     
     if (daysDiff < 7) {
-      return <span className="text-blue-600 font-medium">{formattedDate} (Recent)</span>;
+      return <span className="text-green-600 font-medium">{formattedDate} (Recent)</span>;
     } else if (daysDiff < 30) {
-      return <span className="text-green-600 font-medium">{formattedDate}</span>;
+      return <span className="text-blue-600 font-medium">{formattedDate}</span>;
     } else {
       return <span className="text-gray-700">{formattedDate}</span>;
     }
@@ -305,7 +305,7 @@ function Usagetable() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
             </button>
-            <button 
+            {/* <button 
               className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
               title="View Details"
               onClick={() => navigate(`/usagedetails/${_id}`)}
@@ -313,7 +313,7 @@ function Usagetable() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-            </button>
+            </button> */}
           </div>
         </td>
       </tr>
@@ -412,7 +412,7 @@ function Usagetable() {
             {/* Bottom Action Buttons */}
             <div className="flex space-x-4 mt-6">
               <button
-                className="bg-gradient-to-r from-green-500 to-teal-600 text-white font-medium py-2 px-4 rounded-lg hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5 flex items-center"
+                className="bg-gradient-to-r from-blue-500 to-blue-900 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5 flex items-center"
                 onClick={handleDownloadPDF}             
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
