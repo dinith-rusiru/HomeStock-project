@@ -24,6 +24,9 @@ function Nav() {
           <Link to="/grocerylist" className="text-lg font-semibold">Grocery List</Link>
         </li>
         <li className="hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-300">
+          <Link to="/viewgrocerylist" className="text-lg font-semibold">View Grocery List</Link>
+        </li>
+        <li className="hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-300">
           <Link to="/inventory" className="text-lg font-semibold">Inventory</Link>
         </li>
         <li className="hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-300">

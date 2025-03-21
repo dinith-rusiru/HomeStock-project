@@ -3,6 +3,7 @@ const mongoose= require("mongoose");
 const router = require("./Routes/GshoopperRoutes")
 const fmemberRoutes = require("../Backend/Routes/FmemberRoutes");
 const userr = require("../Backend/Model/userModel");
+const listManagerRouter = require("./Routes/ListManagerRoutes");
 
 const app = express();
 const cors = require("cors");
@@ -18,6 +19,7 @@ app.use("/gshoppers",router);
 // app.use("/usages", router); // Same route handler for usage records
 app.use("/fmembers", fmemberRoutes);
 app.use("/api", userr);
+app.use("/api/list", listManagerRouter);
 mongoose.connect ("mongodb+srv://admin:le7161C9pwmC89qo@cluster0.fpzv9.mongodb.net/")
 .then(()=>console.log("Connected to mongodb"))
 .then(()=>{
