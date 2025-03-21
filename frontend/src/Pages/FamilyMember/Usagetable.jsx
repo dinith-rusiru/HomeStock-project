@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import Nav from "../../Component/Nav";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
-import Usagetableupdatedel from "./Usagetableupdatedel";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -271,6 +271,57 @@ function Usagetable() {
     }
   };
 
+  // UsageTableRow component (previously UsageTableUpdateDel)
+  const UsageTableRow = ({ fmember }) => {
+    const { _id, name, qty, category, usagedate, notes } = fmember;
+    const navigate = useNavigate();
+  
+    // Delete function
+    const deleteHandler = async () => {
+      try {
+        await axios.delete(`http://localhost:5000/fmembers/${_id}`);
+        toast.success("Usage deleted successfully!");
+        fetchHandler(); // Use the parent's fetchHandler to refresh data
+      } catch (error) {
+        console.error("Error deleting usage:", error);
+        toast.error("Failed to delete usage. Please try again.");
+      }
+    };
+  
+    // Navigate to EditUsage with existing data
+    const updateHandler = () => {
+      navigate(`/editusage/${_id}`, { state: { fmember } });
+    };
+  
+    return (
+      <tr className="hover:bg-gray-50 transition-colors text-center">
+        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{name}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{qty}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{category}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{formatDate(usagedate)}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{notes}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+          <button
+            onClick={updateHandler}
+            className="px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-all shadow-md"
+            style={{
+                background: "linear-gradient(90deg, rgba(69,69,69,1) 0%, rgba(204,111,217,1) 35%, rgba(0,154,185,1) 100%)"
+            }}
+          >
+            Update
+          </button>
+  
+          <button
+            onClick={deleteHandler}
+            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all shadow-md"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    );
+  };
+
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
   }
@@ -281,7 +332,7 @@ function Usagetable() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      /////
+      {/* Nav component is handled by app.jsx */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
@@ -331,7 +382,6 @@ function Usagetable() {
                       <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">
                         Notes
                       </th>
-                      {/* Added Actions column header */}
                       <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
@@ -339,13 +389,11 @@ function Usagetable() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {/* Replaced standard rows with the Usagetableupdatedel component */}
                     {usages &&
                       usages.map((usage, i) => (
-                        <Usagetableupdatedel 
+                        <UsageTableRow 
                           key={i} 
                           fmember={usage} 
-                          refreshData={fetchHandler} 
                         />
                       ))}
                   </tbody>
@@ -355,13 +403,6 @@ function Usagetable() {
 
             {/* Buttons */}
             <div className="flex space-x-4 mt-6">
-              {/* <button
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
-                onClick={handlePrint}
-              >
-                Print Report
-              </button> */}
-
               <button
                 className="bg-gradient-to-r from-purple-400 to-teal-600 text-white font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
                 onClick={handleDownloadPDF}             

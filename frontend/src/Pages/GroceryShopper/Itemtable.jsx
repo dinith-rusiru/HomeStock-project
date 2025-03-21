@@ -1,9 +1,6 @@
-// //taking data from the backend
-
 import React, { useEffect, useState, useRef } from "react";
-import Nav from "../../Component/Nav";
 import axios from "axios";
-import Itemtabledetails from "./Itemtabledetails";
+import { Link } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -55,52 +52,11 @@ function Itemtable() {
     setNoResults(filtered.length === 0);
   };
 
-  // // Print Function
-  // const handleDownloadPDF = () => {
-  //   const doc = new jsPDF();
-  
-  //   // Add title with style
-  //   doc.setFontSize(18);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Item Table Report", 14, 20);
-  
-  //   // Add space after the title
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
-  
-  //   // Table header with style
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "bold");
-  //   const tableHeader = [[
-  //     "Name", "Quantity", "Category", "Important Level", "Expiry Date"
-  //   ]];
-    
-  //   // Table data
-  //   const tableData = filteredItems.map((gshopper) => [
-      
-  //     gshopper.name,
-  //     gshopper.qty || "N/A",
-  //     gshopper.category,
-  //     gshopper.importantlevel || "N/A",
-  //     gshopper.expdate ? new Date(gshopper.expdate).toISOString().split("T")[0] : "N/A",
-  //   ]); 
-  
-  //   // Add table
-  //   autoTable(doc, {
-  //     startY: 40,
-  //     head: tableHeader,
-  //     body: tableData,
-  //     theme: 'grid', // Add grid theme
-  //     headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] }, // Header background color
-  //     bodyStyles: { fillColor: [240, 240, 240] }, // Body row background color
-  //     styles: { fontSize: 10, cellPadding: 3, halign: "center" },
-  //   });
-  
-  //   // Save the generated PDF
-  //   doc.save("ItemTable_Report.pdf");
-  // };
-  
+  // Delete function
+  const deleteHandler = async (id) => {
+    await axios.delete(`http://Localhost:5000/gshoppers/${id}`);
+    fetchHandler();
+  };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -275,7 +231,6 @@ function Itemtable() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      /////
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
@@ -328,11 +283,29 @@ function Itemtable() {
 
                   <tbody className="divide-y divide-gray-100">
                     {filteredItems.map((gshopper, i) => (
-                      <Itemtabledetails
-                        key={i}
-                        gshopper={gshopper}
-                        refreshData={fetchHandler}
-                      />
+                      <tr key={i} className="hover:bg-gray-50 transition-colors text-center">
+                        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{gshopper.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{gshopper.qty}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{gshopper.category}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">{gshopper.importantlevel}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-md text-gray-700">
+                          {new Date(gshopper.expdate).toISOString().split("T")[0]}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                          <Link
+                            to={`/itemtable/${gshopper._id}`}
+                            className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm font-medium rounded-lg hover:from-green-600 hover:to-teal-600 transition-all shadow-md"
+                          >
+                            Update
+                          </Link>
+                          <button
+                            onClick={() => deleteHandler(gshopper._id)}
+                            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all shadow-md"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -341,7 +314,6 @@ function Itemtable() {
 
             {/* Buttons */}
             <div className="flex space-x-4 mt-6">
-
               <button
                 className="bg-gradient-to-r from-green-500 to-teal-600 text-white font-medium py-2 px-4 rounded-lg hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-0.5"
                 onClick={handleDownloadPDF}             
