@@ -45,6 +45,7 @@ function Addlist() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
+    
     // Validate if any item has a duplicate name
     const itemNames = items.map(item => item.name.trim().toLowerCase());
     const duplicateItem = itemNames.some((name, index) => itemNames.indexOf(name) !== index);
