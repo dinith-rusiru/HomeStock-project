@@ -19,7 +19,9 @@ const ViewList = () => {
   const fetchItems = async () => {
     try {
       const response = await axios.get("http://localhost:5000/app/list");
-      setItems(response.data.items || response.data);
+      setItems(response.data.items );
+      // console.log(response.data.items);
+      console.log(setItems);
 
       if (!isFetched) {
         toast.success("Items fetched successfully!", {
@@ -61,7 +63,7 @@ const ViewList = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/list/${itemId}`);
+      await axios.delete(`http://localhost:5000/app/list/${itemId}`);
       setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
 
       toast.success("Item deleted successfully!", {
@@ -89,7 +91,7 @@ const ViewList = () => {
     if (!confirmDeleteAll) return;
 
     try {
-      await axios.delete("http://localhost:5000/api/list");
+      await axios.delete("http://localhost:5000/app/list");
       setItems([]);
 
       toast.warning("All items deleted!", {
@@ -112,10 +114,10 @@ const ViewList = () => {
     }
   };
 
-  // Filtered items based on search query
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // // Filtered items based on search query
+  // const filteredItems = items.filter((item) =>
+  //   item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
 
   const generateReport = () => {
     const doc = new jsPDF();
@@ -126,13 +128,13 @@ const ViewList = () => {
     doc.text("Item Name", 14, 30);
     doc.text("Quantity", 140, 30);
 
-    let yPosition = 40;
+    // let yPosition = 40;
 
-    filteredItems.forEach((item) => {
-      doc.text(item.name, 14, yPosition);
-      doc.text(item.qty.toString(), 140, yPosition);
-      yPosition += 10;
-    });
+    // filteredItems.forEach((item) => {
+    //   doc.text(item.name, 14, yPosition);
+    //   doc.text(item.qty.toString(), 140, yPosition);
+    //   yPosition += 10;
+    // });
 
     doc.save("grocery_list_report.pdf");
 
@@ -166,9 +168,7 @@ const ViewList = () => {
             />
           </div>
 
-          {filteredItems.length === 0 ? (
-            <p className="text-center text-gray-600">No items found.</p>
-          ) : (
+         
             <div className="overflow-x-auto">
               <table className="w-full border border-gray-200 text-md">
                 <thead>
@@ -181,7 +181,7 @@ const ViewList = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-100">
-                  {filteredItems.map((item, index) => (
+                  {items.map((item, index) => (
                     <tr key={item._id} className="hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 cursor-pointer transition-all">
                       <td className="px-6 py-4 text-center text-gray-600">{index + 1}</td>
                       <td className="px-6 py-4 text-center text-gray-600">{item.name}</td>
@@ -205,7 +205,7 @@ const ViewList = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          
 
           <div className="mt-6 flex justify-center space-x-4">
             <button onClick={handleDeleteAll} className="bg-red-500 text-white px-4 py-2 rounded-lg cursor-pointer">Delete List</button>
