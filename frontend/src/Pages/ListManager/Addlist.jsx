@@ -69,7 +69,7 @@ function Addlist() {
   const sendRequest = async () => {
     try {
       // Send the request to add items
-      await axios.post("http://localhost:5000/api/list/", { items });
+      await axios.post("http://localhost:5000/app/list/", { items });
   
       // Show success toast
       toast.success("Items added to the list!", {

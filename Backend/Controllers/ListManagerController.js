@@ -113,7 +113,7 @@ const deleteList = async (req, res) => {
 const handleDeleteList = async () => {
   try {
     // Send DELETE request to delete all items
-    await axios.delete("http://localhost:5000/api/list");
+    await axios.delete("http://localhost:5000/app/list");
 
     // Show success message
     toast.success("All items deleted successfully");
