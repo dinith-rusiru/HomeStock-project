@@ -796,7 +796,8 @@ function Itemtable() {
 
   // Calculate stats for the cards
   const totalItems = filteredItems.length;
-  const highPriorityItems = filteredItems.filter(item => item.importantlevel === 'High').length;
+  // const highPriorityItems = filteredItems.filter(item => item.importantlevel === 'High').length;
+  const highPriorityItems = filteredItems.filter(item => item.importantlevel === '5 - High' || item.importantlevel === 5 || item.importantlevel === 'High').length;
   const expiringItems = filteredItems.filter(item => {
     if (!item.expdate) return false;
     const expiryDate = new Date(item.expdate);
@@ -1110,7 +1111,7 @@ function Itemtable() {
 
           <div className="p-8" ref={componentRef}>
             {/* Header Section */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+            {/* <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                   <div>
@@ -1130,7 +1131,7 @@ function Itemtable() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
