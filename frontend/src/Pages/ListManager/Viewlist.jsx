@@ -150,7 +150,6 @@ const ViewList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
-      <Nav />
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden mt-8">
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-t-2xl">
           <h2 className="text-3xl font-bold text-white">Grocery List</h2>
