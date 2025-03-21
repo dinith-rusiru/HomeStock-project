@@ -195,7 +195,7 @@ function Inventory() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      /////
+      
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">

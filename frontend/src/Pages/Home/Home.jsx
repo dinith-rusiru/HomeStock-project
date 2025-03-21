@@ -46,7 +46,7 @@ function Home() {
       className="min-h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${bg})` }}
     >
-      /////
+      
       <div className="container mx-auto px-4 py-12">
         <div className="bg-white bg-opacity-90 rounded-2xl shadow-xl p-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Dashboard</h2>

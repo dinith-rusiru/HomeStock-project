@@ -55,53 +55,7 @@ function Itemtable() {
     setNoResults(filtered.length === 0);
   };
 
-  // // Print Function
-  // const handleDownloadPDF = () => {
-  //   const doc = new jsPDF();
-  
-  //   // Add title with style
-  //   doc.setFontSize(18);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Item Table Report", 14, 20);
-  
-  //   // Add space after the title
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
-  
-  //   // Table header with style
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "bold");
-  //   const tableHeader = [[
-  //     "Name", "Quantity", "Category", "Important Level", "Expiry Date"
-  //   ]];
-    
-  //   // Table data
-  //   const tableData = filteredItems.map((gshopper) => [
-      
-  //     gshopper.name,
-  //     gshopper.qty || "N/A",
-  //     gshopper.category,
-  //     gshopper.importantlevel || "N/A",
-  //     gshopper.expdate ? new Date(gshopper.expdate).toISOString().split("T")[0] : "N/A",
-  //   ]); 
-  
-  //   // Add table
-  //   autoTable(doc, {
-  //     startY: 40,
-  //     head: tableHeader,
-  //     body: tableData,
-  //     theme: 'grid', // Add grid theme
-  //     headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] }, // Header background color
-  //     bodyStyles: { fillColor: [240, 240, 240] }, // Body row background color
-  //     styles: { fontSize: 10, cellPadding: 3, halign: "center" },
-  //   });
-  
-  //   // Save the generated PDF
-  //   doc.save("ItemTable_Report.pdf");
-  // };
-  
-
+ // Print Function
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     
@@ -275,7 +229,7 @@ function Itemtable() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      /////
+      
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
@@ -357,3 +311,6 @@ function Itemtable() {
 }
 
 export default Itemtable;
+
+
+
