@@ -44,4 +44,3 @@ function Itemtabledetails({ gshopper, refreshData }) {
 }
 
 export default Itemtabledetails;
-

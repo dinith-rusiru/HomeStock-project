@@ -77,7 +77,7 @@ function Edititem() {
       await sendRequest();
       toast.success("Item Updated!", {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -88,11 +88,11 @@ function Edititem() {
       // Navigate to item table after 2 seconds
       setTimeout(() => {
         history("/itemtable");
-      }, 1000);
+      }, 2000);
     } catch (error) {
       toast.error("Error updating item!", {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 3000,
       });
     }
   };
@@ -115,7 +115,7 @@ function Edititem() {
       <ToastContainer />
 
       {/* Your Nav component */}
-      
+      /////
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
