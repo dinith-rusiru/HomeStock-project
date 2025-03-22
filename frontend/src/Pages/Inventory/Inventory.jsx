@@ -66,11 +66,11 @@ function Inventory() {
 
   // Define the quantity limits for each importance level
   const importanceLimits = {
-    1: 10, // low
-    2: 5,  // medium
+    1: 1, // low
+    2: 2,  // medium
     3: 3,  // high
-    4: 2,  // critical
-    5: 1,  // highest priority
+    4: 4,  // critical
+    5: 6,  // highest priority
   };
 
   // Function to check if the item quantity is below the limit
