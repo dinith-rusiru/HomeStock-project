@@ -68,7 +68,8 @@ const updategshopper =  async (req,res,next) => {
 
     try{
         gshoppers = await Gshopper.findByIdAndUpdate(id,
-            {name:name, qty:qty, importantlevel:importantlevel, expdate:expdate});
+            // {name:name, qty:qty, importantlevel:importantlevel, expdate:expdate});
+            {name:name, qty:qty,category:category, importantlevel:importantlevel, expdate:expdate});
             gshoppers = await gshoppers.save();
     }catch(err){
         console.log(err);

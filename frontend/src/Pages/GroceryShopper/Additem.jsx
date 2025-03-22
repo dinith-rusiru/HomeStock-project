@@ -273,7 +273,7 @@ function Additem() {
                   type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-4 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-1 text-lg"
                 >
-                  Add Item
+                  + Add Item
                 </button>
               </div>
             </form>
