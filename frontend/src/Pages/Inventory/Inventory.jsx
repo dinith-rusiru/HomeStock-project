@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Nav from "../../Component/Nav";
 import axios from "axios";
 
 const URL = "http://localhost:5000/gshoppers";
@@ -52,12 +51,25 @@ function Inventory() {
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
   }, [reminders]);
 
+  // Add body class to prevent scrolling when modal is open
+  useEffect(() => {
+    if (showReminderModal) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [showReminderModal]);
+
   // Define the quantity limits for each importance level
   const importanceLimits = {
     1: 10, // low
     2: 5,  // medium
-    3: 2,  // high
-    4: 1,  // critical
+    3: 3,  // high
+    4: 2,  // critical
     5: 1,  // highest priority
   };
 
@@ -362,26 +374,25 @@ function Inventory() {
 
                       {/* Add Reminder Button */}
                       <button
-  onClick={() => openReminderModal(item)}
-  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-1 mt-3 px-2 rounded text-xs flex items-center justify-center"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-3 w-3 mr-1"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-    />
-  </svg>
-  Reminder
-</button>
-
+                        onClick={() => openReminderModal(item)}
+                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-1 mt-3 px-2 rounded text-xs flex items-center justify-center"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                        Reminder
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -391,10 +402,14 @@ function Inventory() {
         </div>
       </div>
 
-      {/* Reminder Modal */}
+      {/* Reminder Modal with Blurred Background */}
       {showReminderModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center">
+          {/* Blurred backdrop */}
+          <div className="absolute inset-0 backdrop-blur-md bg-opacity-30"></div>
+          
+          {/* Modal content */}
+          <div className="relative bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 z-10">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Add Reminder for {currentReminder.itemName}
             </h3>
@@ -433,13 +448,13 @@ function Inventory() {
             </div>
             <div className="flex justify-end space-x-3">
               <button
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded transition-colors"
                 onClick={() => setShowReminderModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
                 onClick={addReminder}
               >
                 Add Reminder

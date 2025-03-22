@@ -93,7 +93,8 @@ const Signup = () => {
 
   return (
     <>
-      <div className='mx-auto items-center flex h-screen container p-5'>
+      <div className='bg-stone-100 min-h-screen flex justify-center items-center'>
+    
         <div className='bg-white p-2 py-12 w-full max-w-md mx-auto'>
           <div className='mx-auto w-20 h-20 relative overflow-hidden'>
             <img src={log} alt="login icon" />

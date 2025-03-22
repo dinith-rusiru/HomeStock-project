@@ -12,6 +12,7 @@ import EditItem from "./Pages/GroceryShopper/Edititem";
 import Addusage from "./Pages/FamilyMember/Addusage";
 // import Usagetableupdatedel from "./Pages/FamilyMember/Usagetableupdatedel"
 import Sign from "./Pages/signup";
+import Login from "./Pages/login";
 import Editusage from "./Pages/FamilyMember/Editusage";
 import Viewlist from "./Pages/ListManager/Viewlist";
 import Updatelist from "./Pages/ListManager/Updatelist";
@@ -40,6 +41,7 @@ function App() {
 
 
           <Route path="/Sign" element={<Sign/>}/>
+          <Route path="/sign-up" element={<Login/>}/>
         </Routes>
       </React.Fragment>
     </div> 
