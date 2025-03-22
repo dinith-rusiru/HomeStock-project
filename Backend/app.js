@@ -11,11 +11,11 @@ app.use(express.json());
 app.use(cors());
 
 // Use Routes
-app.use("/api/list", listManagerRouter); // Ensure API prefix is correct
+app.use("/api/list", listManagerRouter);
 app.use("/gshoppers", gshopperRouter);
 
 // MongoDB Connection
-const MONGO_URI = "mongodb+srv://admin:le7161C9pwmC89qo@cluster0.fpzv9.mongodb.net/myDatabaseName";
+const MONGO_URI = "mongodb+srv://admin:le7161C9pwmC89qo@cluster0.fpzv9.mongodb.net/";
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -24,5 +24,5 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   })
   .catch((err) => {
     console.error("❌ MongoDB Connection Error:", err);
-    process.exit(1); // Exit the process if the connection fails
+    process.exit(1);
   });
