@@ -299,8 +299,8 @@ function Inventory() {
                       key={item._id}
                       className="bg-white shadow-md rounded-xl p-4 relative"
                     >
-                      {/* Low Stock Notification Badge */}
-                      {isBelowLimit(item) && !isExpiringSoon(item.expdate) && (
+                      {/* Low Stock Notification Badge - UPDATED: Removed the !isExpiringSoon condition */}
+                      {isBelowLimit(item) && (
                         <div className={`absolute -top-2 -right-2 text-white font-bold rounded-full ${badgeStyle(item.importantlevel)} shadow-lg`}>
                           Low Stock!
                         </div>
@@ -322,10 +322,8 @@ function Inventory() {
 
                       <h4 className="text-lg font-semibold text-gray-700">{item.name}</h4>
                       <p className="text-gray-600">Quantity: {item.qty}</p>
-                      {/* Hide Importance Level for Expiring Items */}
-                      {!isExpiringSoon(item.expdate) && (
-                        <p className="text-gray-600">Importance: {item.importantlevel || "N/A"}</p>
-                      )}
+                      {/* UPDATED: Removed conditional, always show importance level */}
+                      <p className="text-gray-600">Importance: {item.importantlevel || "N/A"}</p>
                       <p className="text-gray-600">
                         Expiry: {item.expdate ? new Date(item.expdate).toISOString().split("T")[0] : "N/A"}
                       </p>
