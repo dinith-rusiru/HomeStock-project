@@ -15,6 +15,7 @@ function Edititem() {
   });
   const history = useNavigate();
   const id = useParams().id;
+  let formattedDate = null;
 
   // Fetch item data on component mount
   useEffect(() => {
@@ -22,7 +23,9 @@ function Edititem() {
       try {
         const res = await axios.get(`http://localhost:5000/gshoppers/${id}`);
         if (res.data.gshopper) {
-          setInputs(res.data.gshopper);
+          formattedDate = formatDateForInput(res.data.gshopper.expdate);
+          setInputs({...res.data.gshopper, expdate:formattedDate});
+          
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -31,6 +34,8 @@ function Edititem() {
     fetchHandler();
   }, [id]);
 
+  console.log(inputs.expdate);
+          
   // Send update request
   const sendRequest = async () => {
     await axios
@@ -47,6 +52,8 @@ function Edititem() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    console.log(value)
+
     if (name === "qty") {
       const qtyValue = Number(value);
       if (qtyValue <= 0) {
@@ -62,7 +69,6 @@ function Edititem() {
         return;
       }
     }
-
     setInputs((preState) => ({
       ...preState,
       [name]: value,
@@ -94,6 +100,10 @@ function Edititem() {
         autoClose: 2000,
       });
     }
+  };
+
+  const formatDateForInput = (isoDate) => {
+    return new Date(isoDate).toISOString().split("T")[0];
   };
 
   // Categories for select dropdown
