@@ -785,6 +785,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Swal from "sweetalert2";
 
 const URL = "http://localhost:5000/gshoppers";
 
@@ -853,13 +854,50 @@ function Itemtable() {
   };
 
   // Delete function
+  // const deleteHandler = async (id) => {
+  //   try {
+  //     await axios.delete(`${URL}/${id}`);
+  //     fetchHandler();
+  //   } catch (error) {
+  //     console.error("Error deleting item:", error);
+  //   }
+  // };
+
+
+
+  // Delete function
+  
   const deleteHandler = async (id) => {
-    try {
-      await axios.delete(`${URL}/${id}`);
-      fetchHandler();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`${URL}/${id}`);
+          Swal.fire({
+            title: "Deleted!",
+            text: "Item has been deleted successfully.",
+            icon: "success",
+            timer: 3000, // Auto-close after 3 seconds
+            showConfirmButton: false,
+          });
+          fetchHandler(); // Refresh the list after deletion
+        } catch (error) {
+          console.error("Error deleting item:", error);
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to delete item.",
+            icon: "error",
+          });
+        }
+      }
+    });
   };
 
   //print pdf
