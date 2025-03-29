@@ -1,24 +1,14 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 
-const glistSchema = new Schema({
-    Item_name:{
-        type:String, //datatype
-        required:true, //validate
-    },
-    qty:{
-        type:Number, //datatype
-        required:true, //validate
-    }, 
-    category:{
-        type:String, //datatype
-        required:true, //validate
-    }, 
-     
-     
+const itemSchema = new mongoose.Schema({
+  Item_name: { type: String, required: true },
+  qty: { type: Number, required: true }
 });
 
-module.exports = mongoose.model(
-    "ListManagerModel", //model class file name
-    glistSchema //function name
-)
+const listManagerSchema = new mongoose.Schema({
+  listName: { type: String, required: true },
+  items: [itemSchema]
+});
+
+const List = mongoose.model("List", listManagerSchema);
+module.exports = List;
