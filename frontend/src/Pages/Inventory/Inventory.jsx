@@ -1,7 +1,7 @@
 import React from "react";
 import Nav from "../../Component/Nav";
 
-function Inventory() {
+function Inve   ntory() {
   return (
     <div>
       <Nav />
