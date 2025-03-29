@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 
-const listSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  qty: { type: Number, required: true, min: 1 },
+const itemSchema = new mongoose.Schema({
+  Item_name: { type: String, required: true },
+  qty: { type: Number, required: true }
 });
 
-module.exports = mongoose.model("List", listSchema);
+const listManagerSchema = new mongoose.Schema({
+  listName: { type: String, required: true },
+  items: [itemSchema]
+});
+
+const List = mongoose.model("List", listManagerSchema);
+module.exports = List;

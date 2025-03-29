@@ -11,6 +11,9 @@ import Additem from "./Pages/GroceryShopper/Additem";
 import EditItem from "./Pages/GroceryShopper/Edititem";
 import Viewlist from "./Pages/ListManager/Viewlist";
 import Updatelist from "./Pages/ListManager/Updatelist";
+import ListDetail from "./Pages/ListManager/ListDetail";
+
+
 
 
 function App() {
@@ -30,7 +33,7 @@ function App() {
           <Route path="/itemtable/:id" element={<EditItem/>}/>
           <Route path="/viewgrocerylist" element={<Viewlist/>}/>
           <Route path="/update-item/:id" element={<Updatelist />} />
-
+          <Route path="/list/:id" element={<ListDetail />} /> 
           
         </Routes>
       </React.Fragment>

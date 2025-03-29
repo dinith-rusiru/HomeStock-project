@@ -1,15 +1,40 @@
 const express = require("express");
-const { getAllItems, addList, getById, updateList, deleteList, deleteAllItems } = require("../Controllers/ListManagerController");
+const {
+  getAllLists,
+  getListById,
+  addList,
+  addItemToList,
+  updateItemInList,
+  deleteItemFromList,
+  deleteList,
+  deleteAllLists
+} = require("../Controllers/ListManagerController");
 
 const router = express.Router();
 
-router.get("/", getAllItems); // Get all items
-router.post("/", addList);     // Add items to the list
-router.get("/:id", getById);   // Get an item by ID
-router.put("/:id", updateList); // Update an item
-router.delete("/:id", deleteList); // Delete an individual item
+// ✅ Get all lists
+router.get("/", getAllLists);
 
-// Route to delete all items
-router.delete("/", deleteAllItems); // Delete all items from the list
+// ✅ Get a specific list by ID
+router.get("/:id", getListById);
+
+// ✅ Add a new list with items
+router.post("/", addList);
+
+// ✅ Add an item to a specific list
+router.put("/:id/items", addItemToList);
+
+// ✅ Update an item in the list
+// Modified this route to reflect the changes for updating item quantity and name
+router.put("/:listId/items/:itemId", updateItemInList);
+
+// ✅ Delete an item from the list
+router.delete("/:listId/items/:itemId", deleteItemFromList);
+
+// ✅ Delete the entire list
+router.delete("/:id", deleteList);
+
+// ✅ Delete all lists
+router.delete("/", deleteAllLists);
 
 module.exports = router;

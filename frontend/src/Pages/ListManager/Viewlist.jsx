@@ -1,219 +1,111 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import Nav from "../../Component/Nav";
-import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { jsPDF } from "jspdf";
-import "react-toastify/dist/ReactToastify.css";
+import jsPDF from "jspdf"; // Import jsPDF
 
 const ViewList = () => {
-  const [items, setItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isFetched, setIsFetched] = useState(false);
-  const history = useNavigate();
+  const [lists, setLists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
 
   useEffect(() => {
-    fetchItems();
+    const fetchLists = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/list");
+        setLists(response.data.lists);
+      } catch (error) {
+        console.error("Error fetching lists:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLists();
   }, []);
 
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/list");
-      setItems(response.data.items || response.data);
-
-      if (!isFetched) {
-        toast.success("Items fetched successfully!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        setIsFetched(true);
+  const handleDeleteList = async (id) => {
+    if (window.confirm("Are you sure you want to delete this list?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/list/${id}`);
+        setLists(lists.filter((list) => list._id !== id));
+      } catch (error) {
+        console.error("Error deleting list:", error);
       }
-    } catch (error) {
-      toast.error("Failed to fetch items", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
     }
   };
 
-  const handleUpdateItem = (itemId) => {
-    history(`/update-item/${itemId}`);
-    toast.info("Redirecting to update item...", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
+  const generatePDF = (list) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text(list.listName, 20, 20); // Add list name at the top of the PDF
+
+    let yOffset = 30;
+    doc.setFontSize(12);
+    list.items.forEach((item, index) => {
+      doc.text(`${index + 1}. ${item.name} - Quantity: ${item.quantity}`, 20, yOffset);
+      yOffset += 10;
     });
+
+    doc.save(`${list.listName}.pdf`); // Save as PDF with list name as file name
   };
 
-  const handleDeleteItem = async (itemId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/list/${itemId}`);
-      setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
-
-      toast.success("Item deleted successfully!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } catch (error) {
-      toast.error("Failed to delete item", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    const confirmDeleteAll = window.confirm("Are you sure you want to delete all items?");
-    if (!confirmDeleteAll) return;
-
-    try {
-      await axios.delete("http://localhost:5000/api/list");
-      setItems([]);
-
-      toast.warning("All items deleted!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } catch (error) {
-      toast.error("Failed to delete all items", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
-  };
-
-  // Filtered items based on search query
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter lists based on search term
+  const filteredLists = lists.filter((list) =>
+    list.listName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const generateReport = () => {
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text("Grocery List Report", 14, 20);
-    doc.setFontSize(12);
-    doc.text("Item Name", 14, 30);
-    doc.text("Quantity", 140, 30);
-
-    let yPosition = 40;
-
-    filteredItems.forEach((item) => {
-      doc.text(item.name, 14, yPosition);
-      doc.text(item.qty.toString(), 140, yPosition);
-      yPosition += 10;
-    });
-
-    doc.save("grocery_list_report.pdf");
-
-    toast.success("PDF report generated successfully!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
-  };
+  if (loading) return <p className="text-center text-gray-600">Loading lists...</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Nav />
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden mt-8">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-t-2xl">
-          <h2 className="text-3xl font-bold text-white">Grocery List</h2>
-          <p className="text-blue-100 mt-1">View and manage your grocery items</p>
-        </div>
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Grocery Lists</h2>
 
-        <div className="p-8">
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="px-4 py-2 border rounded-md w-full"
-            />
+        {/* Search Bar */}
+        <div className="relative mb-4">
+  <input
+    type="text"
+    placeholder="Search by list name"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="border p-2 rounded w-80 bg-gray-200 pl-10" // Add padding to the left for the icon
+  />
+  <i className="fas fa-search absolute left-3 top-2 text-gray-500"></i> {/* Font Awesome search icon */}
+</div>
+
+
+        {filteredLists.length === 0 ? (
+          <p className="text-center text-gray-600">No lists found matching your search. Add a new one!</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredLists.map((list) => (
+              <div key={list._id} className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-700">{list.listName}</h3>
+                <p className="text-gray-600">Items: {list.items.length}</p>
+
+                <div className="mt-4 flex justify-between">
+                  <Link to={`/list/${list._id}`} className="bg-blue-500 text-white px-4 py-2 rounded">
+                    View List
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteList(list._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                  >
+                    Delete List
+                  </button>
+                  <button
+                    onClick={() => generatePDF(list)} // Add this button to generate PDF
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                  >
+                    Generate PDF
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {filteredItems.length === 0 ? (
-            <p className="text-center text-gray-600">No items found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border border-gray-200 text-md">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">ITEM NUMBER</th>
-                    <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                    <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-4 text-center font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-gray-100">
-                  {filteredItems.map((item, index) => (
-                    <tr key={item._id} className="hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 cursor-pointer transition-all">
-                      <td className="px-6 py-4 text-center text-gray-600">{index + 1}</td>
-                      <td className="px-6 py-4 text-center text-gray-600">{item.name}</td>
-                      <td className="px-6 py-4 text-center text-gray-600">{item.qty}</td>
-                      <td className="px-6 py-4 text-center space-x-2">
-                        <button
-                          onClick={() => handleUpdateItem(item._id)}
-                          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-1 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem(item._id)}
-                          className="bg-gradient-to-r from-red-500 to-red-600 text-white py-1 px-4 rounded-lg hover:from-red-600 hover:to-red-700 cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="mt-6 flex justify-center space-x-4">
-            <button onClick={handleDeleteAll} className="bg-red-500 text-white px-4 py-2 rounded-lg cursor-pointer">Delete List</button>
-            <button onClick={generateReport} className="bg-green-500 text-white px-4 py-2 rounded-lg cursor-pointer">Generate PDF</button>
-          </div>
-        </div>
+        )}
       </div>
-      <ToastContainer />
     </div>
   );
 };

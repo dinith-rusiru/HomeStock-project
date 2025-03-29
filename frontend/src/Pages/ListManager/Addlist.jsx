@@ -7,182 +7,89 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Addlist() {
   const history = useNavigate();
-  const [items, setItems] = useState([
-    { name: "", qty: "" }, // Initialize with one empty row
-  ]);
+  const [listName, setListName] = useState("");
+  const [items, setItems] = useState([{ name: "", qty: "" }]);
 
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
-
-    // If name is 'name' field and the value contains numbers, prevent input
     if (name === "name" && /\d/.test(value)) {
-      toast.error("Item name cannot contain numbers.", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      toast.error("Item name cannot contain numbers.", { autoClose: 2000 });
       return;
     }
-
     const newItems = [...items];
     newItems[index][name] = value;
     setItems(newItems);
   };
 
   const handleAddItem = () => {
-    setItems([...items, { name: "", qty: "" }]); // Add a new empty row
+    setItems([...items, { name: "", qty: "" }]);
+    toast.info("New item field added.", { autoClose: 1000 });
   };
 
   const handleRemoveItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index); // Remove the specific item row
+    const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
+    toast.warn("Item removed.", { autoClose: 1000 });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-
-    
-    // Validate if any item has a duplicate name
-    const itemNames = items.map(item => item.name.trim().toLowerCase());
-    const duplicateItem = itemNames.some((name, index) => itemNames.indexOf(name) !== index);
-  
-    if (duplicateItem) {
-      toast.error("Duplicate item names are not allowed!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+    if (!listName.trim()) {
+      toast.error("List name cannot be empty.", { autoClose: 2000 });
       return;
     }
-  
+    const itemNames = items.map((item) => item.name.trim().toLowerCase());
+    const duplicateItem = itemNames.some((name, index) => itemNames.indexOf(name) !== index);
+    if (duplicateItem) {
+      toast.error("Duplicate item names are not allowed!", { autoClose: 2000 });
+      return;
+    }
     await sendRequest();
   };
-  
 
   const sendRequest = async () => {
     try {
-      // Send the request to add items
-      await axios.post("http://localhost:5000/api/list/", { items });
-  
-      // Show success toast
-      toast.success("Items added to the list!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-  
-      // Navigate to the viewlist page after a short delay (to allow toast to be shown)
-      setTimeout(() => {
-        history("/viewgrocerylist"); // Navigate to the viewlist page
-      }, 2000);
+      const formattedItems = items.map((item) => ({
+        Item_name: item.name,
+        qty: Number(item.qty),
+      }));
+      const newList = {
+        listName,
+        items: formattedItems,
+        type: "manual",  // Set the type of list as 'manual'
+      };
+      await axios.post("http://localhost:5000/api/list", newList);
+      toast.success("List added successfully!", { autoClose: 2000 });
+      setTimeout(() => history("/viewgrocerylist"), 2000);
     } catch (error) {
-      console.error("Error adding items:", error);
-      toast.error("Failed to add items.");
+      console.error("Error adding list:", error);
+      toast.error("Failed to add list. Please try again.", { autoClose: 2000 });
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Nav />
-      <ToastContainer /> {/* Notification Container */}
+      <ToastContainer />
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8">
             <h2 className="text-4xl font-bold text-white">Add New List</h2>
-            <p className="text-blue-100 mt-2 text-lg">
-              Enter the details of your new list
-            </p>
           </div>
-
           <div className="p-10">
             <form onSubmit={handleSubmit} className="space-y-8">
+              <div>
+                <label className="text-gray-700">List Name</label>
+                <input type="text" value={listName} onChange={(e) => setListName(e.target.value)} className="w-full px-4 py-3 border rounded-lg" required />
+              </div>
               {items.map((item, index) => (
                 <div key={index} className="flex space-x-4 items-center">
-                  {/* Item Name Input */}
-                  <div className="flex-1">
-                    <label
-                      htmlFor={`name-${index}`}
-                      className="text-base font-medium text-gray-700 block mb-2"
-                    >
-                      Item Name
-                    </label>
-                    <input
-                      type="text"
-                      id={`name-${index}`}
-                      name="name"
-                      value={item.name}
-                      onChange={(e) => handleItemChange(index, e)}
-                      className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-                      placeholder="Enter item name"
-                      required
-                    />
-                  </div>
-
-                  {/* Item Quantity Input */}
-                  <div className="flex-1">
-                    <label
-                      htmlFor={`qty-${index}`}
-                      className="text-base font-medium text-gray-700 block mb-2"
-                    >
-                      Quantity
-                    </label>
-                    <input
-                      type="number"
-                      id={`qty-${index}`}
-                      name="qty"
-                      value={item.qty}
-                      onChange={(e) => handleItemChange(index, e)}
-                      className="w-full px-5 py-4 rounded-lg border border-gray-300 focus:ring-3 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
-                      placeholder="Enter quantity"
-                      required
-                      min="1"
-                    />
-                  </div>
-
-                  {/* Remove button for each item row with colorful styling */}
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveItem(index)}
-                      className="w-20 bg-gradient-to-r from-red-600 to-pink-700 text-white font-medium py-4 px-6 rounded-lg hover:from-red-700 hover:to-pink-800 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-1"
-                    >
-                      Clear
-                    </button>
-                  )}
+                  <input type="text" name="name" value={item.name} onChange={(e) => handleItemChange(index, e)} placeholder="Item Name" className="w-1/2 px-4 py-3 border rounded-lg" required />
+                  <input type="number" name="qty" value={item.qty} onChange={(e) => handleItemChange(index, e)} placeholder="Quantity" className="w-1/3 px-4 py-3 border rounded-lg" required min="1" />
+                  {index > 0 && <button type="button" onClick={() => handleRemoveItem(index)} className="bg-red-500 text-white px-4 py-2 rounded-lg">Remove</button>}
                 </div>
               ))}
-
-              <div className="pt-6">
-                <button
-                  type="button"
-                  onClick={handleAddItem}
-                  className="w-full bg-gradient-to-r from-green-600 to-teal-700 text-white font-medium py-4 px-6 rounded-lg hover:from-green-700 hover:to-teal-800 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-1 text-lg cursor-pointer"
-                >
-                  Add Another Item
-                </button>
-              </div>
-
-              <div className="pt-6">
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-4 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform transition hover:-translate-y-1 text-lg cursor-pointer"
-                >
-                  Add List
-                </button>
-              </div>
+              <button type="button" onClick={handleAddItem} className="bg-green-500 text-white px-6 py-3 rounded-lg w-full">Add Another Item</button>
+              <button type="submit" className="bg-blue-600 text-white px-6 py-3 rounded-lg w-full">Add List</button>
             </form>
           </div>
         </div>

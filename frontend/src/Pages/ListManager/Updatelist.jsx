@@ -14,25 +14,26 @@ const UpdateItem = () => {
 
   const fetchItem = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/list/${id}`);
-      console.log(response.data);  // Log the response to inspect the structure
-      setItem(response.data.item); // Correct the state mapping based on response structure
+      const response = await axios.get(`http://localhost:5000/api/list/${listId}/item/${id}`);
+      setItem(response.data); // Ensure response structure matches
     } catch (error) {
       toast.error("Failed to fetch item details");
     }
   };
+  
 
   const handleUpdate = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/list/${id}`, {
-        qty: item.qty // Only update quantity
+      await axios.put(`http://localhost:5000/api/list/${listId}/item/${id}`, {
+        qty: item.qty, // Only update quantity
       });
       toast.success("Item updated successfully");
-      history("/viewgrocerylist");
+      history(`/viewgrocerylist`);
     } catch (error) {
       toast.error("Failed to update item");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
@@ -47,9 +48,9 @@ const UpdateItem = () => {
             <label className="block text-gray-700">Item Name</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"  // Tailwind CSS classes for disabled style
-              value={item.name}  // Display the name
-              disabled  // Disable the input field
+              className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" // Disabled style
+              value={item.name} // Display the name
+              disabled // Disable the input field
             />
           </div>
           <div className="mb-4">

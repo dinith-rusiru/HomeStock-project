@@ -1,143 +1,169 @@
 const List = require("../Model/ListManagerModel");
 const mongoose = require("mongoose");
 
-// ✅ Get All Items (with optional quantity filter)
-const getAllItems = async (req, res) => {
+// ✅ Get All Lists
+const getAllLists = async (req, res) => {
   try {
-    let items;
-    if (req.query.quantity) {
-      const quantityLimit = parseInt(req.query.quantity);
-      items = await List.find({ qty: { $lte: quantityLimit } });
-    } else {
-      items = await List.find(); // Return all items if no filter is applied
-    }
+    const lists = await List.find();
+    if (!lists.length) return res.status(404).json({ message: "No lists found" });
 
-    if (!items.length) {
-      return res.status(404).json({ message: "No items found" });
-    }
-
-    return res.status(200).json({ items });
+    return res.status(200).json({ lists });
   } catch (error) {
-    console.error("❌ Error fetching items:", error);
+    console.error("❌ Error fetching lists:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Get Item by ID
-const getById = async (req, res) => {
+// ✅ Get List by ID
+const getListById = async (req, res) => {
   const { id } = req.params;
-
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid ID format" });
 
-    const item = await List.findById(id);
-    if (!item) {
-      return res.status(404).json({ message: "Item not found" });
-    }
+    const list = await List.findById(id);
+    if (!list) return res.status(404).json({ message: "List not found" });
 
-    return res.status(200).json({ item });
+    return res.status(200).json({ list });
   } catch (error) {
-    console.error("❌ Error fetching item:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.error("❌ Error fetching list:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Add Multiple Items
+// ✅ Add New List with Items
 const addList = async (req, res) => {
   try {
-    const { items } = req.body; // Extract items array from request body
+    const { listName, items } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: "Invalid request format or empty array" });
+    if (!listName || !Array.isArray(items) || items.some(item => !item.Item_name || !item.qty)) {
+      return res.status(400).json({ message: "Invalid request format: Each item must have 'Item_name' and 'qty'" });
     }
 
-    const savedItems = await List.insertMany(items); // Insert multiple items
-    res.status(201).json({ message: "Items added successfully", items: savedItems });
+    const newList = new List({ listName, items });
+    const savedList = await newList.save();
+
+    return res.status(201).json({ message: "List added successfully", list: savedList });
   } catch (error) {
-    console.error("❌ Error adding items:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error adding list:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Update Item
-const updateList = async (req, res) => {
+
+// ✅ Add Item to a Specific List
+const addItemToList = async (req, res) => {
   const { id } = req.params;
   const { Item_name, qty } = req.body;
 
-  try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
+  if (!Item_name || !qty) {
+    return res.status(400).json({ message: "Item_name and qty are required" });
+  }
 
-    const updatedItem = await List.findByIdAndUpdate(
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid ID format" });
+
+    const updatedList = await List.findByIdAndUpdate(
       id,
-      { Item_name, qty },
+      { $push: { items: { Item_name, qty } } },
       { new: true }
     );
 
-    if (!updatedItem) {
-      return res.status(404).json({ message: "Item not found" });
-    }
+    if (!updatedList) return res.status(404).json({ message: "List not found" });
 
-    return res.status(200).json({ message: "Item updated successfully", item: updatedItem });
+    return res.status(200).json({ message: "Item added successfully", list: updatedList });
   } catch (error) {
-    console.error("❌ Error updating item:", error);
+    console.error("❌ Error adding item:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Delete Item
-const deleteList = async (req, res) => {
-  const { id } = req.params;
+
+// ✅ Update Item in a List
+const updateItemInList = async (req, res) => {
+  try {
+    const { listId, itemId } = req.params;
+    const { Item_name, qty } = req.body;
+
+    const list = await List.findById(listId);
+    if (!list) return res.status(404).json({ message: "List not found" });
+
+    const item = list.items.id(itemId);
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    item.Item_name = Item_name;
+    item.qty = qty;
+
+    await list.save();
+
+    return res.status(200).json({ message: "Item updated successfully", updatedItem: item });
+  } catch (error) {
+    console.error("Error updating item:", error);
+    res.status(500).json({ message: "Error updating item" });
+  }
+};
+
+
+
+// ✅ Delete Item from a List
+const deleteItemFromList = async (req, res) => {
+  const { listId, itemId } = req.params;
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(listId) || !mongoose.Types.ObjectId.isValid(itemId)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
 
-    const deletedItem = await List.findByIdAndDelete(id);
-    if (!deletedItem) {
-      return res.status(404).json({ message: "Item not found" });
-    }
+    const updatedList = await List.findByIdAndUpdate(
+      listId,
+      { $pull: { items: { _id: itemId } } },
+      { new: true }
+    );
 
-    return res.status(200).json({ message: "Item deleted successfully" });
+    if (!updatedList) return res.status(404).json({ message: "List or item not found" });
+
+    return res.status(200).json({ message: "Item deleted successfully", list: updatedList });
   } catch (error) {
     console.error("❌ Error deleting item:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Delete List
-const handleDeleteList = async () => {
+
+// ✅ Delete Entire List
+const deleteList = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    // Send DELETE request to delete all items
-    await axios.delete("http://localhost:5000/api/list");
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid ID format" });
 
-    // Show success message
-    toast.success("All items deleted successfully");
+    const deletedList = await List.findByIdAndDelete(id);
+    if (!deletedList) return res.status(404).json({ message: "List not found" });
 
-    // Clear the items from the UI
-    setItems([]);
+    return res.status(200).json({ message: "List deleted successfully" });
   } catch (error) {
-    toast.error("Failed to delete all items");
-  }
-};
-
-// ✅ Delete All Items (Delete all items in the list)
-const deleteAllItems = async (req, res) => {
-  try {
-    // Delete all items
-    await List.deleteMany({});
-
-    return res.status(200).json({ message: "All items deleted successfully" });
-  } catch (error) {
-    console.error("❌ Error deleting all items:", error);
+    console.error("❌ Error deleting list:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// ✅ Delete All Lists
+const deleteAllLists = async (req, res) => {
+  try {
+    await List.deleteMany({});
+    return res.status(200).json({ message: "All lists deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting all lists:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-
-module.exports = { getAllItems, getById, addList, updateList, deleteList,deleteAllItems };
+module.exports = {
+  getAllLists,
+  getListById,
+  addList,
+  addItemToList,
+  updateItemInList,
+  deleteItemFromList,
+  deleteList,
+  deleteAllLists
+};

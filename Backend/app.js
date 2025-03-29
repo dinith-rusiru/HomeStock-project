@@ -16,6 +16,7 @@ app.use("/gshoppers", gshopperRouter);
 
 // MongoDB Connection
 const MONGO_URI = "mongodb+srv://admin:le7161C9pwmC89qo@cluster0.fpzv9.mongodb.net/";
+//const MONGO_URI = "mongodb+srv://dularinisansala:Dulari123@cluster0.kntu1bq.mongodb.net/";
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
