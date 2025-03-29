@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const gshopperSchema = new Schema({
     name:{
         type:String, //datatype
-        required:true, //validate
+        required:true,
+         //validate
     },
     qty:{
         type:Number, //datatype
