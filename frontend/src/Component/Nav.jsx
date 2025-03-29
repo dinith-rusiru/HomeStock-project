@@ -10,7 +10,9 @@ function Nav() {
         </li>   
         <li className="hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-300">
           <Link to="/additem" className="text-lg font-semibold">Add Item</Link>
-        </li>
+        </li>        
+
+        
         <li className="hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-300">
           <Link to="/itemtable" className="text-lg font-semibold">Item Table</Link>
         </li>
