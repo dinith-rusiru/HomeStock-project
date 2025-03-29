@@ -8,6 +8,9 @@ const gshopperSchema = new Schema({
         type:String, //datatype
         required:true,
          //validate
+
+
+         
     },
     qty:{
         type:Number, //datatype
