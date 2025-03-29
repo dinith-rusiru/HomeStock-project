@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 
-const UpdateItem = () => {
+const UpdateItem = () => {   
   const [item, setItem] = useState({ name: "", qty: "" });
   const { id } = useParams(); // Get the item ID from the URL
   const history = useNavigate();
